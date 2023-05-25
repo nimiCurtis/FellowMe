@@ -16,8 +16,8 @@ class Controller:
     def __init__(self):
         
         ## init publisher and subscribers
-        self.left_pwm_publisher = rospy.Publisher("/left_motor_pwm",Int16,queue_size=100) 
-        self.right_pwm_publisher = rospy.Publisher("/right_motor_pwm",Int16,queue_size=100) 
+        self.left_pwm_publisher = rospy.Publisher("/motors/left/pwm",Int16,queue_size=100) 
+        self.right_pwm_publisher = rospy.Publisher("/motors/right/pwm",Int16,queue_size=100) 
         # self.left_encoder_sub = rospy.Subscriber("/encoder_left_ticks",Int16,self.leftEncoder_callback)
         # self.right_encoder_sub = rospy.Subscriber("/encoder_right_ticks",Int16,self.rightEncoder_callback)
 
