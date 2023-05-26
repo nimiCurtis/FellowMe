@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="fellowme_description">
+  <link name="base_footprint" />
+  <!-- Joint to connect base_footprint with base_link -->
+    <joint name="base_footprint_joint" type="fixed">
+      <parent link="base_footprint"/>
+      <child link="base_link" />
+      <!-- origin xyz="0 0 ${wheel_radius - base_z_origin_to_wheel_origin}" rpy="0 0 0" /-->
+      <!-- origin xyz="0 0 ${wheel_props['radius'] - wheel_props['z_offset'] + 0.1}" rpy="0 0 0" /-->
+      <origin xyz="0 0 0.116" rpy="0 0 0" />
+    </joint>
+
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.008093 0.001509 0.037763"
+        rpy="0 0 0" />
+      <mass
+        value="1.8441" />
+      <inertia
+        ixx="0.008491"
+        ixy="-3.2123E-05"
+        ixz="-1.3095E-05"
+        iyy="0.0070077"
+        iyz="0.00031848"
+        izz="0.0143" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fellowme_description/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fellowme_description/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel_left">
+    <inertial>
+      <origin
+        xyz="-2.6513E-10 2.2676E-09 2.5951E-15"
+        rpy="0 0 0" />
+      <mass
+        value="0.12826" />
+      <inertia
+        ixx="9.3436E-05"
+        ixy="-2.9231E-13"
+        ixz="1.3869E-14"
+        iyy="9.3436E-05"
+        iyz="-8.7266E-15"
+        izz="0.00017754" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fellowme_description/meshes/wheel_left.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fellowme_description/meshes/wheel_left.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="wheel_left_joint"
+    type="continuous">
+    <origin
+      xyz="0 0.13932 -0.075148"
+      rpy="-1.6144 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel_left" />
+    <axis
+      xyz="0 0 -1" />
+  </joint>
+  <link
+    name="wheel_right">
+    <inertial>
+      <origin
+        xyz="0.008093 0.001509 0.037763"
+        rpy="0 0 0" />
+      <mass
+        value="1.8441" />
+      <inertia
+        ixx="0.008491"
+        ixy="-3.2123E-05"
+        ixz="-1.3095E-05"
+        iyy="0.0070077"
+        iyz="0.00031848"
+        izz="0.0143" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fellowme_description/meshes/wheel_right.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fellowme_description/meshes/wheel_right.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="wheel_right_joint"
+    type="continuous">
+    <origin
+      xyz="0 -0.15633 -0.06224"
+      rpy="1.5272 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel_right" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+</robot>
