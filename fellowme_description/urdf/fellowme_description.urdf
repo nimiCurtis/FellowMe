@@ -4,6 +4,10 @@
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
   name="fellowme_description">
+  <!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+
   <link name="base_footprint" />
   <!-- Joint to connect base_footprint with base_link -->
     <joint name="base_footprint_joint" type="fixed">
@@ -18,17 +22,17 @@
     name="base_link">
     <inertial>
       <origin
-        xyz="0.008093 0.001509 0.037763"
+        xyz="0.00809296584758137 -0.000139668978185667 0.0377933555289406"
         rpy="0 0 0" />
       <mass
-        value="1.8441" />
+        value="1.84414105853374" />
       <inertia
-        ixx="0.008491"
-        ixy="-3.2123E-05"
-        ixz="-1.3095E-05"
-        iyy="0.0070077"
-        iyz="0.00031848"
-        izz="0.0143" />
+        ixx="0.00849097690325211"
+        ixy="-3.15215177646165E-05"
+        ixz="-1.44837331305958E-05"
+        iyy="0.00699385048552753"
+        iyz="-5.10239701824776E-07"
+        izz="0.014313870730131" />
     </inertial>
     <visual>
       <origin
@@ -41,7 +45,7 @@
       <material
         name="">
         <color
-          rgba="0.75294 0.75294 0.75294 1" />
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
       </material>
     </visual>
     <collision>
@@ -98,8 +102,8 @@
     name="wheel_left_joint"
     type="continuous">
     <origin
-      xyz="0 0.13932 -0.075148"
-      rpy="-1.6144 0 0" />
+      xyz="0 0.14246 -0.069"
+      rpy="-1.5708 0 0" />
     <parent
       link="base_link" />
     <child
@@ -111,17 +115,17 @@
     name="wheel_right">
     <inertial>
       <origin
-        xyz="0.008093 0.001509 0.037763"
+        xyz="2.1472E-09 7.7562E-10 2.5813E-15"
         rpy="0 0 0" />
       <mass
-        value="1.8441" />
+        value="0.12826" />
       <inertia
-        ixx="0.008491"
-        ixy="-3.2123E-05"
-        ixz="-1.3095E-05"
-        iyy="0.0070077"
-        iyz="0.00031848"
-        izz="0.0143" />
+        ixx="9.3436E-05"
+        ixy="1.1106E-12"
+        ixz="-5.3313E-15"
+        iyy="9.3436E-05"
+        iyz="-1.5494E-14"
+        izz="0.00017754" />
     </inertial>
     <visual>
       <origin
@@ -134,7 +138,7 @@
       <material
         name="">
         <color
-          rgba="0.75294 0.75294 0.75294 1" />
+          rgba="0.79216 0.81961 0.93333 1" />
       </material>
     </visual>
     <collision>
@@ -151,8 +155,8 @@
     name="wheel_right_joint"
     type="continuous">
     <origin
-      xyz="0 -0.15633 -0.06224"
-      rpy="1.5272 0 0" />
+      xyz="0 -0.15346 -0.069"
+      rpy="1.5708 0 0" />
     <parent
       link="base_link" />
     <child

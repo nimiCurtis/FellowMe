@@ -34,9 +34,9 @@ ros::NodeHandle_<ArduinoHardware, 25, 25, 512, 512> nh;
 long enc_left_prev_pos  = -999;
 long enc_left_cur_pos;
 // Encoder output to Arduino Interrupt pin. Tracks the tick count.
-#define ENC_LEFT_A 20 // yellow 
+#define ENC_LEFT_A 21 // white yellow 
 // Other encoder output to Arduino to keep track of wheel direction
-#define ENC_LEFT_B 21 // white
+#define ENC_LEFT_B 20 //  yellow white
 Encoder  Enc_left(ENC_LEFT_A, ENC_LEFT_B);
 
 
@@ -112,10 +112,10 @@ int right_req_pwm = 0;
 
 // Motor Left connections
 const unsigned int EN_left = 12; // white
-const unsigned int IN1_left = 11; //yellow
-const unsigned int IN2_left = 10; //brown
+const unsigned int IN1_left = 10; //yellow
+const unsigned int IN2_left = 11; //brown
 // Create left motor instance
-L298N motor_left(EN_left, IN2_left, IN1_left);
+L298N motor_left(EN_left, IN1_left, IN2_left);
 
 
 // Motor Right connections
@@ -138,12 +138,17 @@ ros::Subscriber<std_msgs::Int16> pwm_right_sub("/motors/right/pwm" , &set_pwm_ri
 void set_pwm_left(const std_msgs::Int16& left_pwm_msg){
   left_last_pwm = (millis()/1000);
   left_req_pwm = left_pwm_msg.data;
-  if(left_req_pwm >= 0 ){
+  if(left_req_pwm > 0 ){
     motor_left.setSpeed(left_req_pwm);
     motor_left.forward();
-  }else {
+  }
+  
+  else if(left_req_pwm < 0) {
     motor_left.setSpeed(-left_req_pwm);
     motor_left.backward();
+ }
+ else{
+    motor_left.stop();
  }
 //  pwmLeftReq = map(pwmLeftReq,-100, 100, 0, 180);
 //  myservo.write(pwmLeftReq);
