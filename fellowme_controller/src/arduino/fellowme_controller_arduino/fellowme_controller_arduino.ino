@@ -93,17 +93,17 @@ void readEncoder_left(){
   if (enc_left_cur_pos != enc_left_prev_pos) {
     enc_left_prev_pos = enc_left_cur_pos;
   }
+  
 }
 
 // right:
 void readEncoder_right(){
   enc_right_cur_pos = Enc_right.read();
+  
   if (enc_right_cur_pos != enc_right_prev_pos) {
     enc_right_prev_pos = enc_right_cur_pos;
   }
 }
-
-
 
 
 ////////////////// Motor Controller Variables and Constants ///////////////////
@@ -202,10 +202,10 @@ void loop() {
   float deltaT = ((float) (currT-prevT))/1.0e6; // [seconds]
   
   
-  //if (currentMillis-previousMillis >= 10){
-  if (deltaT >= 0.01){  
 
-    
+  //if (currentMillis-previousMillis >= 10){
+  
+  if (deltaT >= 0.01){  
   // Compute velocity with method 1
 //    float vr_count = (pos_right - posPrev_right)/deltaT; // [count/sec]
 //    posPrev_right = pos_right; 
@@ -229,14 +229,7 @@ void loop() {
 //    vr_curr_filter = 0.9*vr_curr_filter + 0.05*vr_curr_raw + 0.05*vr_prev_raw;
 //    vr_prev_raw = vr_curr_raw;
 //    
-  
-  // calc distances
-//    float delta_right_distance = vr_curr_filter*deltaT ; // right wheel distance passed [meter/sec]*[sec] 
-//    float delta_left_distance = vl_curr_filter*deltaT ; // left wheel distance passed [meter/sec]*[sec]
-    //float delta_distance = (delta_right_distance + delta_left_distance)/2 ; // total distance robot passed [meter]
-    //float delta_theta = (delta_right_distance - delta_left_distance)/L;
-    
-    
+
     //////////// set ROS msgs //////////////
 
     // set encoder msgs [counts]

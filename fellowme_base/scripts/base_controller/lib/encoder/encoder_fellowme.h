@@ -126,4 +126,4 @@ namespace fellowme
     };
 }
 
-#endif // fellowme_ENCODER_H
+#endif // FELLOWME_ENCODER_H
