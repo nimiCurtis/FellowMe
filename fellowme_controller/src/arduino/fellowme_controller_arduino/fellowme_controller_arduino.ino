@@ -26,7 +26,7 @@ ros::NodeHandle_<ArduinoHardware, 25, 25, 512, 512> nh;
 
 sensor_msgs::JointState msg_measured_joint_states_;
 ros::Publisher pub_measured_joint_states_("measured_joint_states", &msg_measured_joint_states_);
-
+char *names[] = {"wheel_left", "wheel_right"};
 
 
 ////////////////// Encoder & Velocities variables and consts /////////////////
@@ -185,12 +185,18 @@ void setup() {
   msg_measured_joint_states_.position[1] = 0;
   msg_measured_joint_states_.velocity = (float*)malloc(sizeof(float) * 2);
   msg_measured_joint_states_.velocity_length = 2;
+//  msg_measured_joint_states_.name = (char*)malloc(sizeof(char) * 2);
+  msg_measured_joint_states_.name_length = 2;
+  msg_measured_joint_states_.effort = (float*)malloc(sizeof(float) * 2);
+  msg_measured_joint_states_.effort_length = 2;
+
   nh.advertise(pub_measured_joint_states_);
 //  myservo.attach(7);  // attaches the servo on pin 9 to the servo object
 
   // Set the motors intial speed - starts from 'stop' state
   motor_left.stop();
   motor_right.stop();
+  
    
   // ROS Setup
   nh.getHardware()->setBaud(115200); ///changed from 57600, 115200 , 9200, 74880, 38400, 19200, 4800
@@ -256,6 +262,9 @@ void loop() {
     }
     msg_measured_joint_states_.velocity[1] = right_angular_velocity;
 
+    msg_measured_joint_states_.name = names;
+    msg_measured_joint_states_.effort[0] = left_req_pwm;
+    msg_measured_joint_states_.effort[1] = right_req_pwm;
   // Compute velocity with method 1
 //    float vr_count = (pos_right - posPrev_right)/deltaT; // [count/sec]
 //    posPrev_right = pos_right; 
