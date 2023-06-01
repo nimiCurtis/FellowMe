@@ -13,7 +13,7 @@
 
 #include "fellowme_base_config.h"
 #include "encoder_fellowme.h"
-#include "motor_controller.h"
+#include "dfr0601/dfr0601.h"
 #include "pid.h"
 
 
@@ -27,7 +27,7 @@ namespace fellowme {
      * operated at specific update rates \ref update_rate_ for different sensors and acutators.
      * There exist three update rates:
      * - control
-     * - imu
+     * - imu (future release)
      * - debug
      * 
      * The control update rate is used to read from the encoders and write computed pwm signals to the motors
@@ -430,9 +430,9 @@ void fellowme::BaseController<TMotorController, TMotorDriver>::setup()
 
 template <typename TMotorController, typename TMotorDriver>
 void fellowme::BaseController<TMotorController, TMotorDriver>::init()
-{
+{   
     nh_.loginfo("Get Parameters from Parameter Server");
-    nh_.getParam("/fellowme/encoder_resolution", &this->encoder_resolution_);
+    // nh_.getParam("/fellowme/encoder_resolution", &this->encoder_resolution_);
     String log_msg = String("/fellowme/encoder_resolution: ") + String(encoder_resolution_);
     nh_.loginfo(log_msg.c_str());
     nh_.getParam("/fellowme/mobile_base_controller/wheel_radius", &wheel_radius_);

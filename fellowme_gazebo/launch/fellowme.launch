@@ -1,0 +1,17 @@
+<launch>
+    <!--arg name="model" default="$(env fellowme_MODEL)" doc="model type [fellowme, remo]"/-->
+    <arg name="model" default="fellowme"/>
+
+    <arg name="rvizconfig" default="$(find fellowme_control)/rviz/fellowme.rviz" />
+    <arg name="world_name" default="$(find fellowme_gazebo)/worlds/fellowme_world.world"/>
+
+    <include file="$(find fellowme_gazebo)/launch/fellowme_view.launch">
+        <arg name="model" value="$(arg model)" />
+        <arg name="world_name" value="$(arg world_name)"/>
+    </include>
+
+    <include file="$(find fellowme_control)/launch/fellowme_control.launch">
+        <arg name="model" value="$(arg model)" />
+    </include>
+
+</launch>

@@ -1,0 +1,7 @@
+<launch>
+    <!-- Arguments -->
+    <!--arg name="model" default="$(env fellowme_MODEL)" doc="model type [fellowme, remo]"/-->
+    <arg name="model" default="fellowme"/>
+    <!-- Launch visualization in rviz -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find fellowme_bringup)/rviz/$(arg model)_bringup.rviz" required="true" />
+</launch>

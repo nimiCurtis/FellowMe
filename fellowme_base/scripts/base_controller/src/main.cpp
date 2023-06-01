@@ -1,18 +1,18 @@
-#include <ros.h>
-//#include "ros.h"
+//#include <ros.h>
+#include "ros.h"
 #include "fellowme_base_config.h"
 #include "base_controller.h"
-#include "motor_controller.h"
+#include "dfr0601/dfr0601.h"
 
 ros::NodeHandle nh;
 
 using namespace fellowme;
 
-MotorController motor_controller_left = MotorController(MOTOR_LEFT_PWM_PIN,MOTOR_LEFT_IN1_PIN,MOTOR_LEFT_IN2_PIN);
-MotorController motor_controller_right = MotorController(MOTOR_RIGHT_PWM_PIN,MOTOR_RIGHT_IN1_PIN,MOTOR_RIGHT_IN2_PIN);
+Dfr0601MotorController motor_controller_left = Dfr0601MotorController(MOTOR_LEFT_EN_PIN,MOTOR_LEFT_IN1_PIN,MOTOR_LEFT_IN2_PIN);
+Dfr0601MotorController motor_controller_right = Dfr0601MotorController(MOTOR_RIGHT_EN_PIN,MOTOR_RIGHT_IN1_PIN,MOTOR_RIGHT_IN2_PIN);
 
 //wtf???
-BaseController<AdafruitMotorController, Adafruit_MotorShield> base_controller(nh, &motor_controller_left, &motor_controller_right);
+BaseController<Dfr0601MotorController, L298N> base_controller(nh, &motor_controller_left, &motor_controller_right);
 
 
 void setup()

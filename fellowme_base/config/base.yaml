@@ -1,0 +1,12 @@
+# Hardware related parameters
+# will be loaded onto the parameter server
+# See the fellowme.launch
+fellowme:
+  encoder_resolution: 540
+  gain: 1.0
+  trim: 0.0
+  motor_constant: 1.0 #27.0
+  pwm_limit: 1.0
+  debug:
+    hardware_interface: false
+    base_controller: true
