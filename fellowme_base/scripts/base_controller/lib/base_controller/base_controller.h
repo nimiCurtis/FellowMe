@@ -1,6 +1,3 @@
-/*
- * Author: Franz Pucher
- */
 
 #ifndef FELLOWME_BASE_CONTROLLER_H
 #define FELLOWME_BASE_CONTROLLER_H

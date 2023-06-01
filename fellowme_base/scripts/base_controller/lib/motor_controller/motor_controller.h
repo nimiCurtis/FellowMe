@@ -5,6 +5,7 @@
 #include <motor_controller_interface.h>
 #include <motor_driver.h>
 
+
 namespace fellowme {
 
     class MotorController :    { MotorControllerIntf<motor_driver>
