@@ -3,12 +3,13 @@
 
 #include <Arduino.h>
 #include "fellowme_base_config.h"
-//#include <L298N.h>
-#include "L298N.h"
-L298N L298N;
+#include <L298N.h>
+//include "L298N.h"
+
 
 fellowme::Dfr0601MotorController::Dfr0601MotorController(uint8_t enPin, uint8_t in1Pin, uint8_t in2Pin)
-{
+    // : enPin_(enPin), in1Pin_(in1Pin), in2Pin_(in2Pin)
+{   
     motor_driver_ = L298N(in1Pin, in2Pin, enPin);
     
 }

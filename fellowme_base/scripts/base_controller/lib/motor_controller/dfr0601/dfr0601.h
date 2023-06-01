@@ -52,9 +52,9 @@ namespace fellowme {
             void setSpeed(int value);
 
         private:
-            // int pwmPin_;
-            // int in1Pin_;
-            // int in2Pin_;
+            // uint8_t enPin_;
+            // uint8_t in1Pin_;
+            // uint8_t in2Pin_;
             // Pointer to the motor that is controlled by this motor controller.
             L298N *pMotor_;
         };
