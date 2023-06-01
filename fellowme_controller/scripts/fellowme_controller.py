@@ -7,6 +7,9 @@ from math import pi , cos , sin , asin
 from std_msgs.msg import Float64 ,Float32 , Int16
 from fellowme_msgs.srv import PwmVal , PwmValResponse
 from std_srvs.srv import SetBool , SetBoolResponse
+from nav_msgs.msg import Odometry 
+from geometry_msgs.msg import Pose ,Twist , Point , Quaternion , Vector3
+from tf.broadcaster import TransformBroadcaster
 import time
 
 
@@ -21,6 +24,7 @@ class Controller:
         # self.left_encoder_sub = rospy.Subscriber("/encoder_left_ticks",Int16,self.leftEncoder_callback)
         # self.right_encoder_sub = rospy.Subscriber("/encoder_right_ticks",Int16,self.rightEncoder_callback)
 
+        self.odom_publisher = rospy.Publisher("/odom" , Odometry , queue_size = 1000)
 
         self.t_0 = time.time()
 
@@ -48,6 +52,10 @@ class Controller:
         self.L = 0.296       # need to update
 
 
+        ## init odom and tf
+        self.odom = Odometry()
+        self.odom_broadcaster = TransformBroadcaster()
+        
         ## shutdownhook process
         self.ctrl_c = False
         rospy.on_shutdown(self.shutdownhook)
@@ -67,7 +75,8 @@ class Controller:
         # publish pwm
         self.left_pwm_publisher.publish(self.pwm_left_out)
         self.right_pwm_publisher.publish(self.pwm_right_out)
-
+        self.odom_publisher.publish(self.odom)
+        
     def set_pwm_callback(self, request):
         response = PwmValResponse()
         if ((request.pwm_left<-250)or(request.pwm_left>250)or(request.pwm_right<-250)or(request.pwm_right>250)):
@@ -108,6 +117,16 @@ class Controller:
 
         self.pwm_left_out.data = 0
         self.pwm_right_out.data = 0
+    
+    def odom_msg_init(self,v,w,odom_quat):
+        self.odom = Odometry()
+        self.odom.header.stamp = self.current_time
+        self.odom.header.frame_id = "odom"
+        self.odom.child_frame_id = "base_footprint"
+        # set the position and orientation
+        self.odom.pose.pose = Pose(Point(self.x,self.y,0) , Quaternion(*odom_quat))
+        # set velocity
+        self.odom.twist.twist = Twist(Vector3(v,0,0), Vector3(0,0,w))
 
 
 if __name__ == '__main__':

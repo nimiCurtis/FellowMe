@@ -13,17 +13,21 @@
 #include <ros/time.h>
 #include <std_msgs/Int16.h>
 #include <std_msgs/Float32.h>
+#include <sensor_msgs/JointState.h>
 #include <Encoder.h>
 #include <L298N.h>
 
 
-////motor control
-//#include <Servo.h>
-//Servo myservo;  // create servo object to control a servo
- 
+
 // Handles startup and shutdown of ROS
 //ros::NodeHandle nh;
 ros::NodeHandle_<ArduinoHardware, 25, 25, 512, 512> nh;
+
+
+sensor_msgs::JointState msg_measured_joint_states_;
+ros::Publisher pub_measured_joint_states_("measured_joint_states", &msg_measured_joint_states_);
+char *names[] = {"wheel_left", "wheel_right"};
+
 
 ////////////////// Encoder & Velocities variables and consts /////////////////
 // Change these two numbers to the pins connected to your encoder.
@@ -33,25 +37,27 @@ ros::NodeHandle_<ArduinoHardware, 25, 25, 512, 512> nh;
 
 long enc_left_prev_pos  = -999;
 long enc_left_cur_pos;
+long penc_left = 0;
 // Encoder output to Arduino Interrupt pin. Tracks the tick count.
-#define ENC_LEFT_A 21 // white yellow 
+#define ENC_LEFT_A 21 // blue 
 // Other encoder output to Arduino to keep track of wheel direction
-#define ENC_LEFT_B 20 //  yellow white
+#define ENC_LEFT_B 20 //  white
 Encoder  Enc_left(ENC_LEFT_A, ENC_LEFT_B);
 
 
 
 // Encoder output to Arduino Interrupt pin. Tracks the tick count.
-#define ENC_RIGHT_A 18 // yellow
+#define ENC_RIGHT_A 18 // white
 // Tracks the direction of rotation.
-#define ENC_RIGHT_B 17  // white
+#define ENC_RIGHT_B 17  // blue
 Encoder  Enc_right(ENC_RIGHT_A, ENC_RIGHT_B); 
 long enc_right_prev_pos  = -999;
 long enc_right_cur_pos;
+long penc_right = 0;
 
 
 //geometric params
-const int N = 140; // <<<check
+const int N = 540; // <<<check
 const float R = 0.1016/2;
 const float L = 0.296;
 const float distance_per_count = (2*PI*R)/N;
@@ -115,7 +121,7 @@ const unsigned int EN_left = 12; // white
 const unsigned int IN1_left = 10; //yellow
 const unsigned int IN2_left = 11; //brown
 // Create left motor instance
-L298N motor_left(EN_left, IN1_left, IN2_left);
+L298N motor_left(EN_left, IN2_left, IN1_left);
 
 
 // Motor Right connections
@@ -173,11 +179,24 @@ void set_pwm_right(const std_msgs::Int16& right_pwm_msg){
 
 void setup() {
 
+  msg_measured_joint_states_.position = (float*)malloc(sizeof(float) * 2);
+  msg_measured_joint_states_.position_length = 2;
+  msg_measured_joint_states_.position[0] = 0;
+  msg_measured_joint_states_.position[1] = 0;
+  msg_measured_joint_states_.velocity = (float*)malloc(sizeof(float) * 2);
+  msg_measured_joint_states_.velocity_length = 2;
+//  msg_measured_joint_states_.name = (char*)malloc(sizeof(char) * 2);
+  msg_measured_joint_states_.name_length = 2;
+  msg_measured_joint_states_.effort = (float*)malloc(sizeof(float) * 2);
+  msg_measured_joint_states_.effort_length = 2;
+
+  nh.advertise(pub_measured_joint_states_);
 //  myservo.attach(7);  // attaches the servo on pin 9 to the servo object
 
   // Set the motors intial speed - starts from 'stop' state
   motor_left.stop();
   motor_right.stop();
+  
    
   // ROS Setup
   nh.getHardware()->setBaud(115200); ///changed from 57600, 115200 , 9200, 74880, 38400, 19200, 4800
@@ -207,10 +226,45 @@ void loop() {
   float deltaT = ((float) (currT-prevT))/1.0e6; // [seconds]
   
   
-
+  
   //if (currentMillis-previousMillis >= 10){
   
-  if (deltaT >= 0.01){  
+  if (deltaT >= 0.01){
+    
+    //left
+    long delta_ticks_left = enc_left_cur_pos - penc_left;
+
+    double delta_angle_left = (double)delta_ticks_left * ((2*PI)/N);
+    double left_angular_velocity = delta_angle_left/deltaT;
+    
+    msg_measured_joint_states_.position[0] += delta_angle_left;
+    if (msg_measured_joint_states_.position[0] > 2*PI){
+      (msg_measured_joint_states_.position[0] -= 2*PI);
+    }
+    if (msg_measured_joint_states_.position[0] < 0){
+      msg_measured_joint_states_.position[0] += 2*PI;
+    }
+    msg_measured_joint_states_.velocity[0] = left_angular_velocity;
+
+
+    //right
+    long delta_ticks_right = enc_right_cur_pos - penc_right;
+
+    double delta_angle_right = (double)delta_ticks_right * ((2*PI)/N);
+    double right_angular_velocity = delta_angle_right/deltaT;
+    
+    msg_measured_joint_states_.position[1] += delta_angle_right;
+    if (msg_measured_joint_states_.position[1] > 2*PI){
+      msg_measured_joint_states_.position[1] -= 2*PI;
+    }
+    if (msg_measured_joint_states_.position[1] < 0){
+      msg_measured_joint_states_.position[1] += 2*PI;
+    }
+    msg_measured_joint_states_.velocity[1] = right_angular_velocity;
+
+    msg_measured_joint_states_.name = names;
+    msg_measured_joint_states_.effort[0] = left_req_pwm;
+    msg_measured_joint_states_.effort[1] = right_req_pwm;
   // Compute velocity with method 1
 //    float vr_count = (pos_right - posPrev_right)/deltaT; // [count/sec]
 //    posPrev_right = pos_right; 
@@ -253,7 +307,13 @@ void loop() {
     
     enc_left_pub.publish( &enc_left_msg ); 
     enc_right_pub.publish( &enc_right_msg );
+    pub_measured_joint_states_.publish( &msg_measured_joint_states_);
 
+
+
+    
+    penc_left = enc_left_cur_pos ; 
+    penc_right = enc_right_cur_pos ; 
 
     // update previous time
     //startTimer();
