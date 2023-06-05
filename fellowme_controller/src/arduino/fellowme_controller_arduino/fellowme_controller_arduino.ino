@@ -26,7 +26,7 @@ ros::NodeHandle_<ArduinoHardware, 25, 25, 512, 512> nh;
 
 sensor_msgs::JointState msg_measured_joint_states_;
 ros::Publisher pub_measured_joint_states_("measured_joint_states", &msg_measured_joint_states_);
-char *names[] = {"wheel_left", "wheel_right"};
+char const *names[] = {"wheel_left", "wheel_right"};
 
 
 ////////////////// Encoder & Velocities variables and consts /////////////////
@@ -113,8 +113,8 @@ void readEncoder_right(){
 
 
 ////////////////// Motor Controller Variables and Constants ///////////////////
-int left_req_pwm = 0;
-int right_req_pwm = 0;
+int left_pwm = 0;
+int right_pwm = 0;
 
 // Motor Left connections
 const unsigned int EN_left = 12; // white
@@ -135,43 +135,66 @@ L298N motor_right(EN_right, IN2_right, IN1_right);
 double left_last_pwm = 0;
 double right_last_pwm  = 0; 
 
+
+void set_pwm(L298N motor, int pwm_val){
+  if(pwm_val > 0 ){
+    motor.setSpeed(pwm_val);
+    motor.forward();
+  }
+  
+  else if(pwm_val < 0) {
+    motor.setSpeed(-pwm_val);
+    motor.backward();
+ }
+  else{
+    motor.stop();
+ }
+}
+
+
+
+
+
+//TODO:
+//const float kp = ;// set kp = proportional coefficient
+//const float kd = ;// set kd = derivative coefficient
+//const float ki = ;// set ki = integral coefficient
+//const int max_pwm = 255;
+//const int min_pwm = -255;
+//
+//double left_target_angular_velocity = ;
+
+static inline int8_t sgn(int val) {
+  if (val < 0) return -1;
+  if (val==0) return 0;
+  return 1;
+}
+
+// //write the pid function
+//int pid_compute(double e, double derivative_e,double i_e){
+//  double pwm_output = //use the pid equation and the constants
+//  pwm_output = // clamp the pwm if it is above the MAX_PWM or below the MIN_PWM 
+//  return pwm_out_put
+//}
+//TODO END
+
 /////////////////////// Pwm subscribing ////////////////////////////
 
 // Set up ROS subscriber to the pwm command
-ros::Subscriber<std_msgs::Int16> pwm_left_sub("/motors/left/pwm" , &set_pwm_left);
-ros::Subscriber<std_msgs::Int16> pwm_right_sub("/motors/right/pwm" , &set_pwm_right);
+ros::Subscriber<std_msgs::Int16> pwm_left_sub("/motors/left/pwm" , &set_pwm_left_msg);
+ros::Subscriber<std_msgs::Int16> pwm_right_sub("/motors/right/pwm" , &set_pwm_right_msg);
 
-void set_pwm_left(const std_msgs::Int16& left_pwm_msg){
+
+void set_pwm_left_msg(const std_msgs::Int16& left_pwm_msg){
   left_last_pwm = (millis()/1000);
-  left_req_pwm = left_pwm_msg.data;
-  if(left_req_pwm > 0 ){
-    motor_left.setSpeed(left_req_pwm);
-    motor_left.forward();
-  }
-  
-  else if(left_req_pwm < 0) {
-    motor_left.setSpeed(-left_req_pwm);
-    motor_left.backward();
- }
- else{
-    motor_left.stop();
- }
-//  pwmLeftReq = map(pwmLeftReq,-100, 100, 0, 180);
-//  myservo.write(pwmLeftReq);
+  left_pwm = left_pwm_msg.data;
+  set_pwm(motor_left, left_pwm) ;
 }
 
-void set_pwm_right(const std_msgs::Int16& right_pwm_msg){
+void set_pwm_right_msg(const std_msgs::Int16& right_pwm_msg){
   right_last_pwm = (millis()/1000);
-  right_req_pwm = right_pwm_msg.data;
-  if(right_req_pwm >= 0 ){
-    motor_right.setSpeed(right_req_pwm);
-    motor_right.forward();
-  }else {
-    motor_right.setSpeed(-right_req_pwm);
-    motor_right.backward();
- }
-//  pwmLeftReq = map(pwmLeftReq,-100, 100, 0, 180);
-//  myservo.write(pwmLeftReq);
+  right_pwm = right_pwm_msg.data;
+  set_pwm(motor_right, right_pwm) ;
 }
 
 
@@ -262,9 +285,18 @@ void loop() {
     }
     msg_measured_joint_states_.velocity[1] = right_angular_velocity;
 
+
+    //TODO: control left
+//    double left_error = //calc velocity error between target angular velocity and current velocity 
+//    double left_d_error = //calc the derivative velocity -> hint: deltaT = time difference
+//    double left_i_error = //calc the integral derivative -> hint: deltaT = time difference
+//    double left_pwm = // compute the controled pwm value -> hint: use the pid_compute function
+    //TODO END 
+
+    
     msg_measured_joint_states_.name = names;
-    msg_measured_joint_states_.effort[0] = left_req_pwm;
-    msg_measured_joint_states_.effort[1] = right_req_pwm;
+    msg_measured_joint_states_.effort[0] = left_pwm;
+    msg_measured_joint_states_.effort[1] = right_pwm;
   // Compute velocity with method 1
 //    float vr_count = (pos_right - posPrev_right)/deltaT; // [count/sec]
 //    posPrev_right = pos_right; 
