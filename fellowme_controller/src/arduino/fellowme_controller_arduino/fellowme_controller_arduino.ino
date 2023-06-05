@@ -64,11 +64,10 @@ const float distance_per_count = (2*PI*R)/N;
 
 
 // velocities
-float vr_prev_raw = 0;
-float vr_curr_filter = 0;
-
-float vl_prev_raw = 0;
-float vl_curr_filter = 0;
+double left_angular_velocity_filter = 0;
+double left_angular_velocity_prev = 0;
+double right_angular_velocity_filter = 0;
+double right_angular_velocity_prev = 0;
 
 // Time interval for measurements in milliseconds
 long previousMillis = 0;
@@ -156,26 +155,34 @@ void set_pwm(L298N motor, int pwm_val){
 
 
 //TODO:
-//const float kp = ;// set kp = proportional coefficient
-//const float kd = ;// set kd = derivative coefficient
-//const float ki = ;// set ki = integral coefficient
-//const int max_pwm = 255;
-//const int min_pwm = -255;
-//
-//double left_target_angular_velocity = ;
+const float kp = 35;// set kp = proportional coefficient
+const float kd = 1;// set kd = derivative coefficient
+const float ki = 100;// set ki = integral coefficient
+const int max_pwm = 255;
+const int min_pwm = -255;
 
-static inline int8_t sgn(int val) {
-  if (val < 0) return -1;
-  if (val==0) return 0;
-  return 1;
-}
+double left_target_angular_velocity = 2 ;
+double right_target_angular_velocity = 2 ;
+
+double pre_left_error = 0;
+double left_i_error = 0;
+
+double pre_right_error = 0;
+double right_i_error = 0;
+
 
 // //write the pid function
-//int pid_compute(double e, double derivative_e,double i_e){
-//  double pwm_output = //use the pid equation and the constants
-//  pwm_output = // clamp the pwm if it is above the MAX_PWM or below the MIN_PWM 
-//  return pwm_out_put
-//}
+int pid_compute(double e, double e_d,double e_i){
+  double pwm_output = kp*e + kd*e_d + ki*e_i; //use the pid equation and the constants
+  // clamp the pwm if it is above the MAX_PWM or below the MIN_PWM 
+  if (pwm_output > max_pwm){
+    pwm_output = max_pwm;
+  }
+  else if(pwm_output<min_pwm){
+    pwm_output = min_pwm;
+  }
+  return pwm_output;
+}
 //TODO END
 
 /////////////////////// Pwm subscribing ////////////////////////////
@@ -188,13 +195,13 @@ ros::Subscriber<std_msgs::Int16> pwm_right_sub("/motors/right/pwm" , &set_pwm_ri
 void set_pwm_left_msg(const std_msgs::Int16& left_pwm_msg){
   left_last_pwm = (millis()/1000);
   left_pwm = left_pwm_msg.data;
-  set_pwm(motor_left, left_pwm) ;
+//  set_pwm(motor_left, left_pwm) ;
 }
 
 void set_pwm_right_msg(const std_msgs::Int16& right_pwm_msg){
   right_last_pwm = (millis()/1000);
   right_pwm = right_pwm_msg.data;
-  set_pwm(motor_right, right_pwm) ;
+//  set_pwm(motor_right, right_pwm) ;
 }
 
 
@@ -230,8 +237,8 @@ void setup() {
   nh.advertise(enc_right_pub);
 
   //subscribers:
-  nh.subscribe(pwm_left_sub);
-  nh.subscribe(pwm_right_sub);
+//  nh.subscribe(pwm_left_sub);
+//  nh.subscribe(pwm_right_sub);
   
 
 }
@@ -252,7 +259,7 @@ void loop() {
   
   //if (currentMillis-previousMillis >= 10){
   
-  if (deltaT >= 0.01){
+  if (deltaT >= 0.05){
     
     //left
     long delta_ticks_left = enc_left_cur_pos - penc_left;
@@ -267,7 +274,11 @@ void loop() {
     if (msg_measured_joint_states_.position[0] < 0){
       msg_measured_joint_states_.position[0] += 2*PI;
     }
-    msg_measured_joint_states_.velocity[0] = left_angular_velocity;
+
+    left_angular_velocity_filter = 0.92*left_angular_velocity_filter + 0.04*left_angular_velocity + 0.04*left_angular_velocity_prev;
+    left_angular_velocity_prev = left_angular_velocity;
+    
+    msg_measured_joint_states_.velocity[0] = left_angular_velocity_filter;
 
 
     //right
@@ -283,16 +294,36 @@ void loop() {
     if (msg_measured_joint_states_.position[1] < 0){
       msg_measured_joint_states_.position[1] += 2*PI;
     }
-    msg_measured_joint_states_.velocity[1] = right_angular_velocity;
+
+    right_angular_velocity_filter = 0.92*right_angular_velocity_filter + 0.04*right_angular_velocity + 0.04*right_angular_velocity_prev;
+    right_angular_velocity_prev = right_angular_velocity;
+    
+    msg_measured_joint_states_.velocity[1] = right_angular_velocity_filter;
 
 
-    //TODO: control left
-//    double left_error = //calc velocity error between target angular velocity and current velocity 
-//    double left_d_error = //calc the derivative velocity -> hint: deltaT = time difference
-//    double left_i_error = //calc the integral derivative -> hint: deltaT = time difference
-//    double left_pwm = // compute the controled pwm value -> hint: use the pid_compute function
-    //TODO END 
+    //control left
+    
+    double left_error = left_target_angular_velocity - left_angular_velocity_filter;  //calc velocity error between target angular velocity and current velocity 
+    double left_d_error = (left_error - pre_left_error)/deltaT;//calc the derivative velocity -> hint: deltaT = time difference
+    left_i_error +=  left_error*deltaT; //calc the integral derivative -> hint: deltaT = time difference
+    pre_left_error = left_error;
+    
+    double left_pwm = pid_compute(left_error,left_d_error, left_i_error);// compute the controled pwm value -> hint: use the pid_compute function
+        
 
+    
+    //control right
+    
+    double right_error = right_target_angular_velocity - right_angular_velocity_filter;  //calc velocity error between target angular velocity and current velocity 
+    double right_d_error = (right_error - pre_right_error)/deltaT;//calc the derivative velocity -> hint: deltaT = time difference
+    right_i_error +=  right_error*deltaT; //calc the integral derivative -> hint: deltaT = time difference
+    pre_right_error = right_error;
+    
+    double right_pwm = pid_compute(right_error,right_d_error, right_i_error);// compute the controled pwm value -> hint: use the pid_compute function
+
+    //motor command
+    set_pwm(motor_left,(int)left_pwm);
+    set_pwm(motor_right,(int)right_pwm); 
     
     msg_measured_joint_states_.name = names;
     msg_measured_joint_states_.effort[0] = left_pwm;
@@ -327,14 +358,14 @@ void loop() {
     enc_left_msg.data = enc_left_cur_pos ; 
     enc_right_msg.data = enc_right_cur_pos ; 
     
-     // Stop the car if there are no pwm messages in the last 3 sec
-    if((millis()/1000) - left_last_pwm > 3) {   ////// changed to 3 from 1 sec
-      motor_left.stop();
-    }
-    if((millis()/1000) - right_last_pwm > 3) {   ////// changed to 3 from 1 sec
-      motor_right.stop();
-    }
-    
+//     // Stop the car if there are no pwm messages in the last 3 sec
+//    if((millis()/1000) - left_last_pwm > 3) {   ////// changed to 3 from 1 sec
+//      motor_left.stop();
+//    }
+//    if((millis()/1000) - right_last_pwm > 3) {   ////// changed to 3 from 1 sec
+//      motor_right.stop();
+//    }
+//    
     //////////  publishing to topics //////
     
     enc_left_pub.publish( &enc_left_msg ); 
