@@ -68,6 +68,7 @@ add_message_files(
 add_service_files(
   FILES
   PwmVal.srv
+  WheelsCmdSrv.srv
 )
 
 ## Generate actions in the 'action' folder

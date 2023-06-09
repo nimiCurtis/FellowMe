@@ -5,7 +5,8 @@ import numpy as np
 import rospy
 from math import pi , cos , sin , asin
 from std_msgs.msg import Float64 ,Float32 , Int16
-from fellowme_msgs.srv import PwmVal , PwmValResponse
+from fellowme_msgs.srv import PwmVal , PwmValResponse, WheelsCmdSrv, WheelsCmdSrvResponse, WheelsCmdSrvRequest
+from fellowme_msgs.msg import WheelsCmdStamped, WheelsCmd, AngularVelocities
 from std_srvs.srv import SetBool , SetBoolResponse
 from nav_msgs.msg import Odometry 
 from geometry_msgs.msg import Pose ,Twist , Point , Quaternion , Vector3
@@ -19,18 +20,23 @@ class Controller:
     def __init__(self):
         
         ## init publisher and subscribers
-        self.left_pwm_publisher = rospy.Publisher("/motors/left/pwm",Int16,queue_size=100) 
-        self.right_pwm_publisher = rospy.Publisher("/motors/right/pwm",Int16,queue_size=100) 
+        # self.left_pwm_publisher = rospy.Publisher("/motors/left/pwm",Int16,queue_size=100) 
+        # self.right_pwm_publisher = rospy.Publisher("/motors/right/pwm",Int16,queue_size=100) 
         # self.left_encoder_sub = rospy.Subscriber("/encoder_left_ticks",Int16,self.leftEncoder_callback)
         # self.right_encoder_sub = rospy.Subscriber("/encoder_right_ticks",Int16,self.rightEncoder_callback)
 
+        self.cmd_wheels_pub = rospy.Publisher("fellowme/fellowme_base/motors/cmd_wheels",WheelsCmdStamped,queue_size=100)
+        self.cmd_wheels_msg = WheelsCmdStamped()
+        self.cmd_wheels_msg.wheels_cmd = WheelsCmd(AngularVelocities([0,0]))
+        
+        
         self.odom_publisher = rospy.Publisher("/odom" , Odometry , queue_size = 1000)
 
         self.t_0 = time.time()
 
         ## init services
-        self.set_pwm_service = rospy.Service('motors/set_pwm', PwmVal , self.set_pwm_callback)
-        self.motors_stop_service = rospy.Service('motors/stop', SetBool , self.stop_callback)
+        self.cmd_wheels_srv = rospy.Service('fellowme/fellowme_base/motors/cmd_wheels', WheelsCmdSrv , self.cmd_wheels_srv_callback)
+        self.motors_stop_service = rospy.Service('fellowme/fellowme_base/motors/stop', SetBool , self.stop_callback)
 
         ## init time variables 
         self.current_time = rospy.Time.now()
@@ -73,17 +79,24 @@ class Controller:
     def publish(self):
         
         # publish pwm
-        self.left_pwm_publisher.publish(self.pwm_left_out)
-        self.right_pwm_publisher.publish(self.pwm_right_out)
-        self.odom_publisher.publish(self.odom)
+        # self.left_pwm_publisher.publish(self.pwm_left_out)
+        # self.right_pwm_publisher.publish(self.pwm_right_out)
         
-    def set_pwm_callback(self, request):
-        response = PwmValResponse()
-        if ((request.pwm_left<-250)or(request.pwm_left>250)or(request.pwm_right<-250)or(request.pwm_right>250)):
+        self.cmd_wheels_msg.header.stamp = rospy.Time.now()
+        self.cmd_wheels_msg.header.frame_id = ''
+        
+        self.cmd_wheels_pub.publish(self.cmd_wheels_msg)
+        
+        # self.odom_publisher.publish(self.odom)
+        
+    def cmd_wheels_srv_callback(self, request:WheelsCmdSrvRequest):
+        response = WheelsCmdSrvResponse()
+        cmd_left = request.wheels_cmd.angular_velocities.joint[0]
+        cmd_right = request.wheels_cmd.angular_velocities.joint[1]
+        if ((cmd_left<-6)or(cmd_left>6)or(cmd_right<-6)or(cmd_right>6)):
             response.success = False
         else:
-            self.pwm_left_out.data = request.pwm_left
-            self.pwm_right_out.data = request.pwm_right
+            self.cmd_wheels_msg.wheels_cmd = request.wheels_cmd
             response.success = True
         return response
 
@@ -103,21 +116,26 @@ class Controller:
         return response
 
     def stop(self):
+        
         time_relation = 1 # [sec]
-        pwm_left = self.pwm_left_out.data
-        pwm_right = self.pwm_right_out.data
+        cmd_left = self.cmd_wheels_msg.wheels_cmd.angular_velocities.joint[0]
+        cmd_right = self.cmd_wheels_msg.wheels_cmd.angular_velocities.joint[1]
         last_time = rospy.Time.now()
         current_time = rospy.Time.now()
         dt  = (current_time - last_time).to_sec()
+        # rate = rospy.Rate(30)
         while(dt < time_relation):  ### need to publish pwm? 
             dt  = (current_time - last_time).to_sec()
-            self.pwm_left_out.data = int(((-pwm_left*dt)/time_relation)) + pwm_left
-            self.pwm_right_out.data = int(((-pwm_right*dt)/time_relation)) + pwm_right    
+            cmd_left = ((-cmd_left*dt)/time_relation) + cmd_left
+            cmd_right = ((-cmd_right*dt)/time_relation) + cmd_right
+            self.cmd_wheels_msg.wheels_cmd = WheelsCmd(AngularVelocities([cmd_left,cmd_right]))
             current_time = rospy.Time.now()
+            # self.publish()
+            # rate.sleep()
 
-        self.pwm_left_out.data = 0
-        self.pwm_right_out.data = 0
-    
+        self.cmd_wheels_msg.wheels_cmd = WheelsCmd(AngularVelocities([0,0]))
+        # self.publish()
+
     def odom_msg_init(self,v,w,odom_quat):
         self.odom = Odometry()
         self.odom.header.stamp = self.current_time

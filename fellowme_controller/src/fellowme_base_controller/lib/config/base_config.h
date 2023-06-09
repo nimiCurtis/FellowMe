@@ -1,19 +1,42 @@
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+/// Encoder pins
+// Left
+#define ENCODER_LEFT_A 21
+#define ENCODER_LEFT_B 20
+/// Encoder pins
+// Right
+#define ENCODER_RIGHT_A 18
+#define ENCODER_RIGHT_B 17
 
-const int ENC_LEFT_A = 21;
-const int ENC_LEFT_B = 20;
-const int ENC_RIGHT_A = 18;
-const int ENC_RIGHT_B = 17;
-const unsigned int EN_LEFT = 12;
-const unsigned int IN1_LEFT = 10;
-const unsigned int IN2_LEFT = 11;
-const unsigned int EN_RIGHT = 6;
-const unsigned int IN1_RIGHT = 5;
-const unsigned int IN2_RIGHT = 4;
-const int N = 540;
-const float R = 0.1016 / 2;
-const float L = 0.296;
-const float DISTANCE_PER_COUNT = (2 * PI * R) / N;
+// Encoder resolution used for initialization 
+// will be read from parameter server
+#define ENCODER_RESOLUTION 540
 
-#endif  // CONSTANTS_H
+// Wheels radius
+#define WHEELS_RADIUS 0.1016/2
+
+/// Motor pins
+// Left
+#define MOTOR_LEFT_EN 12 //white
+#define MOTOR_LEFT_IN1 10 //brown
+#define MOTOR_LEFT_IN2 11 //yellow
+/// Motor pins
+// Right
+#define MOTOR_RIGHT_EN 6 //white
+#define MOTOR_RIGHT_IN1 5 //yellow
+#define MOTOR_RIGHT_IN2 4 //brown
+
+#define K_P 35 // P constant
+#define K_I 100 // I constant
+#define K_D 1 // D constant
+
+#define PWM_BITS 8  // PWM Resolution of the microcontroller
+
+
+#define UPDATE_RATE_CONTROL 20
+#define UPDATE_RATE_IMU 1
+#define UPDATE_RATE_DEBUG 10
+
+#define E_STOP_COMMAND_RECEIVED_DURATION 5 // Stop motors if no command was received after this amount of seconds
+
+#define PWM_MAX pow(2, PWM_BITS) - 1
+#define PWM_MIN -(PWM_MAX)
