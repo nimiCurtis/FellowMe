@@ -26,6 +26,7 @@ namespace fellowme_base
     {
         float angular_position_;
         float angular_velocity_;
+        float effort_;
     };
 
     /// \brief Hardware interface for a robot

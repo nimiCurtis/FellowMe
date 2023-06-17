@@ -11,7 +11,7 @@ int main(int argc, char **argv)
     // Create an instance of your robot so that this instance knows about all 
     // the resources that are available.
     fellowme_base::FellowmeHWInterface fellowme(nh);
- 
+
     // Create an instance of the controller manager and pass it the robot, 
     // so that it can handle its resources.
     controller_manager::ControllerManager cm(&fellowme);

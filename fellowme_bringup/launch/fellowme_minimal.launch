@@ -10,18 +10,12 @@
   <!--arg name="model" default="$(env fellowme_MODEL)" doc="model type [fellowme, remo]"/-->
   <arg name="model" default="fellowme"/>
   
-  <!-- Base Controller for Motor Driver, Encoders and IMU -->
-  <!-- Run rosserial to connect with the Teensy 3.2 board connected to the motor encoders -->
+  <!-- Base Controller for Motor Driver, Encoders, Servo and IMU -->
+  <!-- Run rosserial to connect with the Arduino MEga board connected to the motor encoders -->
   <node name="rosserial_base_controller" pkg="rosserial_python" type="serial_node.py" respawn="false"
       output="screen" ns="fellowme" args="_port:=/dev/ttyACM0
                                          _baud:=115200"/>
 
-    
-  <!-- Motors -->
-  <!-- Deprecated: Use when having a grove_motor_driver together with the grove_motor_driver ROS package -->
-  <!--node name="motor_driver" pkg="grove_motor_driver" type="motor_driver.py" respawn="false"
-      output="screen" ns="fellowme" /-->
-  
   <!-- Including the following launch file from fellowme_base package will -->
   <!-- Load the robot description onto the parameter server -->
   <!-- Run the controller manager with fellowme's hardware interface -->

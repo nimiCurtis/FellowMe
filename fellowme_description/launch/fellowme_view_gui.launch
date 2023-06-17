@@ -1,0 +1,4 @@
+<launch>
+    <include file="$(find fellowme_description)/launch/fellowme_view.launch" />
+    <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+</launch>

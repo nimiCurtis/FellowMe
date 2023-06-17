@@ -33,7 +33,6 @@ namespace fellowme_base
         error += !rosparam_shortcuts::get(name_, nh_, "mobile_base_controller/wheel_radius", wheel_radius_);
         error += !rosparam_shortcuts::get(name_, nh_, "mobile_base_controller/linear/x/max_velocity", max_velocity_);
         // Get additional parameters from the fellowme_base/config/base.yaml which is stored on the parameter server
-        error += !rosparam_shortcuts::get(name_, nh_, "encoder_resolution", encoder_resolution_);
         error += !rosparam_shortcuts::get(name_, nh_, "gain", gain_);
         error += !rosparam_shortcuts::get(name_, nh_, "trim", trim_);
         error += !rosparam_shortcuts::get(name_, nh_, "motor_constant", motor_constant_);
@@ -49,24 +48,15 @@ namespace fellowme_base
 
         ROS_INFO_STREAM("mobile_base_controller/wheel_radius: " << wheel_radius_);
         ROS_INFO_STREAM("mobile_base_controller/linear/x/max_velocity: " << max_velocity_);
-        ROS_INFO_STREAM("encoder_resolution: " << encoder_resolution_);
-        ROS_INFO_STREAM("gain: " << gain_);
-        ROS_INFO_STREAM("trim: " << trim_);
-        ROS_INFO_STREAM("motor_constant: " << motor_constant_);
         ROS_INFO_STREAM("pwm_limit: " << pwm_limit_);
-
-        // Setup publisher for the motor driver 
-        pub_left_motor_value_ = nh_.advertise<std_msgs::Int32>("motor_left", 10);
-        pub_right_motor_value_ = nh_.advertise<std_msgs::Int32>("motor_right", 10);
 
         //Setup publisher for angular wheel joint velocity commands
         pub_wheel_cmd_velocities_ = nh_.advertise<fellowme_msgs::WheelsCmdStamped>("wheel_cmd_velocities", 10);
 
         // Setup publisher to reset wheel encoders (used during first launch of the hardware interface)
-        pub_reset_encoders_ = nh_.advertise<std_msgs::Empty>("reset", 10);
         // Setup subscriber for the wheel encoders
-        sub_encoder_ticks_ = nh_.subscribe("encoder_ticks", 10, &FellowmeHWInterface::encoderTicksCallback, this);
-        sub_measured_joint_states_ = nh_.subscribe("measured_joint_states", 10, &FellowmeHWInterface::measuredJointStatesCallback, this);
+        sub_encoder_ticks_ = nh_.subscribe("fellowme_base/encoders/ticks", 10, &FellowmeHWInterface::encoderTicksCallback, this);
+        sub_measured_joint_states_ = nh_.subscribe("fellowme_base/measured_joint_states", 10, &FellowmeHWInterface::measuredJointStatesCallback, this);
 
         // Initialize the hardware interface
         init(nh_, nh_);
@@ -110,14 +100,16 @@ namespace fellowme_base
             encoder_ticks_[i] = 0.0;
             measured_joint_states_[i].angular_position_ = 0.0;
             measured_joint_states_[i].angular_velocity_ = 0.0;
+            measured_joint_states_[i].effort_ = 0.0;
+
 
             // Initialize the pid controllers for the motors using the robot namespace
-            std::string pid_namespace = "pid/" + motor_names[i];
-            ROS_INFO_STREAM("pid namespace: " << pid_namespace);
-            ros::NodeHandle nh(root_nh, pid_namespace);
-            // TODO implement builder pattern to initialize values otherwise it is hard to see which parameter is what.
-            pids_[i].init(nh, 0.8, 0.35, 0.5, 0.01, 3.5, -3.5, false, max_velocity_, -max_velocity_);
-            pids_[i].setOutputLimits(-max_velocity_, max_velocity_);
+            // std::string pid_namespace = "pid/" + motor_names[i];
+            // ROS_INFO_STREAM("pid namespace: " << pid_namespace);
+            // ros::NodeHandle nh(root_nh, pid_namespace);
+            // // TODO implement builder pattern to initialize values otherwise it is hard to see which parameter is what.
+            // pids_[i].init(nh, 0.8, 0.35, 0.5, 0.01, 3.5, -3.5, false, max_velocity_, -max_velocity_);
+            // pids_[i].setOutputLimits(-max_velocity_, max_velocity_);
         }
 
         // Register the JointStateInterface containing the read only joints
@@ -144,7 +136,7 @@ namespace fellowme_base
         {
             joint_positions_[i] = measured_joint_states_[i].angular_position_;
             joint_velocities_[i] = measured_joint_states_[i].angular_velocity_;
-            joint_efforts_[i] = 0.0; // unused with diff_drive_controller
+            joint_efforts_[i] = measured_joint_states_[i].effort_; // unused with diff_drive_controller
         }
 
         if (debug_)
@@ -185,48 +177,6 @@ namespace fellowme_base
 
         pub_wheel_cmd_velocities_.publish(wheel_cmd_msg);
 
-        // The following code provides another velocity commands interface
-        // With it a motor driver node can directly subscribe to the desired velocities.
-
-        // Convert the velocity command to a percentage value for the motor
-        // This maps the velocity to a percentage value which is used to apply
-        // a percentage of the highest possible battery voltage to each motor.
-        std_msgs::Int32 left_motor;
-        std_msgs::Int32 right_motor;
-
-        double pid_outputs[NUM_JOINTS];
-        double motor_cmds[NUM_JOINTS] ;
-        pid_outputs[0] = pids_[0](joint_velocities_[0], joint_velocity_commands_[0], period);
-        pid_outputs[1] = pids_[1](joint_velocities_[1], joint_velocity_commands_[1], period);
-
-        motor_cmds[0] = pid_outputs[0] / max_velocity_ * 100.0;
-        motor_cmds[1] = pid_outputs[1] / max_velocity_ * 100.0;
-        left_motor.data = motor_cmds[0];
-        right_motor.data = motor_cmds[1];
-
-        // Calibrate motor commands to deal with different gear friction in the
-        // left and right motors and possible differences in the wheels.
-        // Add calibration offsets to motor output in low regions
-        // To tune these offset values command the robot to drive in a straight line and
-        // adjust if it isn't going straight.
-        // int left_offset = 10;
-        // int right_offset = 5;
-        // int threshold = 55;
-        // if (0 < left_motor.data && left_motor.data < threshold)
-        // {
-        //     // the second part of the multiplication lets the offset decrease with growing motor values
-        //     left_motor.data += left_offset * (threshold - left_motor.data) / threshold;
-        // }
-        // if (0 < right_motor.data && right_motor.data < threshold)
-        // {
-        //     // the second part of the multiplication lets the offset decrease with growing motor values
-        //     right_motor.data += right_offset * (threshold - right_motor.data) / threshold;
-        // }
-
-        pub_left_motor_value_.publish(left_motor);
-        pub_right_motor_value_.publish(right_motor);
-
-
         if (debug_)
         {
             const int width = 10;
@@ -235,28 +185,8 @@ namespace fellowme_base
             // Header
             ss << std::left << std::setw(width) << std::setfill(sep) << "Write"
             << std::left << std::setw(width) << std::setfill(sep) << "velocity"
-            << std::left << std::setw(width) << std::setfill(sep) << "p_error"
-            << std::left << std::setw(width) << std::setfill(sep) << "i_error"
-            << std::left << std::setw(width) << std::setfill(sep) << "d_error"
-            << std::left << std::setw(width) << std::setfill(sep) << "pid out"
-            << std::left << std::setw(width) << std::setfill(sep) << "percent"
             << std::endl;
-            double p_error, i_error, d_error;
-            for (int i = 0; i < NUM_JOINTS; ++i)
-            {
-                pids_[i].getCurrentPIDErrors(&p_error, &i_error, &d_error);
 
-                // Joint i
-                std::string j = "j" + std::to_string(i) + ":";
-                ss << std::left << std::setw(width) << std::setfill(sep) << j
-                << std::left << std::setw(width) << std::setfill(sep) << joint_velocity_commands_[i]
-                << std::left << std::setw(width) << std::setfill(sep) << p_error
-                << std::left << std::setw(width) << std::setfill(sep) << i_error
-                << std::left << std::setw(width) << std::setfill(sep) << d_error
-                << std::left << std::setw(width) << std::setfill(sep) << pid_outputs[i]
-                << std::left << std::setw(width) << std::setfill(sep) << motor_cmds[i]
-                << std::endl;
-            }
             ROS_INFO_STREAM(std::endl << ss.str());
         }
     }
@@ -281,10 +211,6 @@ namespace fellowme_base
         {
             ROS_INFO_STREAM("Number of measured joint states publishers: " << num_publishers);
         }
-
-        ROS_INFO("Publish /reset to encoders");
-        std_msgs::Empty msg;
-        pub_reset_encoders_.publish(msg);
 
         return (num_publishers > 0);
     }
@@ -371,31 +297,32 @@ namespace fellowme_base
         {
             measured_joint_states_[i].angular_position_ = msg_joint_states->position[i];
             measured_joint_states_[i].angular_velocity_ = msg_joint_states->velocity[i];
+            measured_joint_states_[i].effort_ = msg_joint_states->effort[i];
         }
         //ROS_DEBUG_STREAM_THROTTLE(1, "Left encoder ticks: " << encoder_ticks_[0]);
         //ROS_DEBUG_STREAM_THROTTLE(1, "Right encoder ticks: " << encoder_ticks_[1]);
     }
 
 
-    double FellowmeHWInterface::ticksToAngle(const int &ticks) const
-    {
-        // Convert number of encoder ticks to angle in radians
-        double angle = (double)ticks * (2.0*M_PI / encoder_resolution_);
-        ROS_DEBUG_STREAM_THROTTLE(1, ticks << " ticks correspond to an angle of " << angle);
-	    return angle;
-    }
+    // double FellowmeHWInterface::ticksToAngle(const int &ticks) const
+    // {
+    //     // Convert number of encoder ticks to angle in radians
+    //     double angle = (double)ticks * (2.0*M_PI / encoder_resolution_);
+    //     ROS_DEBUG_STREAM_THROTTLE(1, ticks << " ticks correspond to an angle of " << angle);
+	//     return angle;
+    // }
 
-    double FellowmeHWInterface::normalizeAngle(double &angle) const
-    {
-        // https://stackoverflow.com/questions/11498169/dealing-with-angle-wrap-in-c-code
-        angle = fmod(angle, 2.0*M_PI);
+    // double FellowmeHWInterface::normalizeAngle(double &angle) const
+    // {
+    //     // https://stackoverflow.com/questions/11498169/dealing-with-angle-wrap-in-c-code
+    //     angle = fmod(angle, 2.0*M_PI);
 
-        if (angle < 0)
-            angle += 2.0*M_PI;
+    //     if (angle < 0)
+    //         angle += 2.0*M_PI;
 
-        ROS_DEBUG_STREAM_THROTTLE(1, "Normalized angle: " << angle);
-        return angle;
-    }
+    //     ROS_DEBUG_STREAM_THROTTLE(1, "Normalized angle: " << angle);
+    //     return angle;
+    // }
 
 
     double FellowmeHWInterface::linearToAngular(const double &distance) const

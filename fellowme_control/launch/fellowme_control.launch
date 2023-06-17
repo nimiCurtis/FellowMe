@@ -1,3 +1,5 @@
+<!-- fellowme control launch without visulization at all -->
+
 <launch>
     <!-- 
         Launch file follows: 
@@ -15,15 +17,13 @@
 
     <!-- load the controllers -->
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-        output="screen" ns="fellowme" args="joint_state_controller
-                                            mobile_base_controller"/>
-
+        output="screen" ns="fellowme" args="mobile_base_controller"/>
 
     <!-- convert joint states to TF transforms for rviz, etc -->
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
         ns="fellowme" respawn="false" output="screen">
         <remap from="/joint_states" to="/fellowme/joint_states" />
-        <!-- param name="publish_frequency" type="double" value="30.0" /-->
+        <!-- param name="publish_frequency" type="double" value="30.0" / -->
     </node>
 
     <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">

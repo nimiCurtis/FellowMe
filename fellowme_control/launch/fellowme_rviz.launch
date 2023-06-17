@@ -1,6 +1,0 @@
-<launch>
-    <arg name="rvizconfig" default="$(find fellowme_control)/rviz/fellowme.rviz" />
-
-    <!-- Launch visualization in rviz -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find fellowme_description)/urdf.rviz" required="true" />
-</launch>

@@ -1,0 +1,13 @@
+
+<!-- fellowme control launch with visulization at rviz(fellowme_rviz) only! -->
+
+<launch>
+    <!-- Launch control -->
+    <include file="$(find fellowme_control)/launch/fellowme_control.launch">
+    </include>
+    
+    <arg name="rvizconfig" default="$(find fellowme_control)/rviz/fellowme_control.rviz" />
+    <!-- Launch visualization in rviz -->
+    <include file="$(find fellowme_description)/launch/fellowme_view.launch">
+    </include>
+</launch>

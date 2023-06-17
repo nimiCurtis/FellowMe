@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="fellowme">
+
+  <xacro:property name="package_name" value="fellowme_description"/>
+  <xacro:property name="robot_name" value="fellowme"/>
+
+  <xacro:include filename="$(find ${package_name})/urdf/include/common_macros.urdf.xacro" />
+  <xacro:include filename="$(find ${package_name})/urdf/include/robot.gazebo.xacro" />
+
+  <xacro:property name="wheel_yaml" value="$(find ${package_name})/config/${robot_name}/wheel.yaml" />
+  <xacro:property name="wheel_props" value="${xacro.load_yaml(wheel_yaml)}"/>
+
+  <!-- <xacro:property name="motor_yaml" value="$(find ${package_name})/config/${robot_name}/motor.yaml" />
+  <xacro:property name="motor_props" value="${xacro.load_yaml(motor_yaml)}"/> -->
+
+  <xacro:property name="base_yaml" value="$(find ${package_name})/config/${robot_name}/base.yaml" />
+  <xacro:property name="base_props" value="${xacro.load_yaml(base_yaml)}"/>
+
+  <!-- Footprint link -->
+  <xacro:footprint wheel_props="${wheel_props}" />
+
+  <!-- Base link -->
+  <xacro:base base_prop="${base_props}" mesh="${base_props['base']['mesh']}" >
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:base>
+
+  <!-- Back Caster Wheel -->
+  <!-- <xacro:caster_wheel prefix="rear" reflect="-1"
+                      wheel_props="${caster_wheel_props}">
+  </xacro:caster_wheel> -->
+
+  <!-- motor Wheels -->
+  <xacro:wheel prefix="right" reflect="-1" 
+                      wheel_props="${wheel_props}"
+                      base_props="${base_props}" > 
+  </xacro:wheel>
+
+  <xacro:wheel prefix="left" reflect="1" 
+                      wheel_props="${wheel_props}"
+                      base_props="${base_props}" > 
+  </xacro:wheel>
+
+
+  <!-- Motors
+  <xacro:motor prefix="right" reflect="-1" 
+                      motor_props="${motor_props}"
+                      base_props="${base_props}" > 
+  </xacro:motor>
+
+  <xacro:motor prefix="left" reflect="1" 
+                      motor_props="${motor_props}"
+                      base_props="${base_props}" > 
+  </xacro:motor> -->
+
+  <!-- Gazebo -->
+  <xacro:gazebo_ros_control robotNamespace="/fellowme">
+  </xacro:gazebo_ros_control>
+
+</robot>
