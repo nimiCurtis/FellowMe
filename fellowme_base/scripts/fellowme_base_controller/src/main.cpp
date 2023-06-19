@@ -4,16 +4,15 @@
 #include <std_msgs/Float32.h>
 #include <sensor_msgs/JointState.h>
 #include <Encoder.h>
-#include <L298N.h>
 #include <fellowme_msgs/WheelsCmdStamped.h>
 #include <fellowme_msgs/EncodersStamped.h>
+#include <L298NController.h>
 #include <base_config.h>
 #include <EncoderHandler.h>
 
 using namespace fellowme_msgs;
 
 // Function prototypes
-void set_pwm(L298N motor, int pwm_val);
 int pid_compute(double e, double e_d, double e_i);
 void cmd_wheels_callback(const fellowme_msgs::WheelsCmdStamped& cmd_msg);
 
@@ -36,10 +35,9 @@ int left_pwm = 0;
 int right_pwm = 0;
 
 // Motor Left connections
-L298N motor_left(MOTOR_LEFT_EN, MOTOR_LEFT_IN2, MOTOR_LEFT_IN1);
-
+L298NController motor_left(MOTOR_LEFT_EN, MOTOR_LEFT_IN2, MOTOR_LEFT_IN1);
 // Motor Right connections
-L298N motor_right(MOTOR_RIGHT_EN, MOTOR_RIGHT_IN2, MOTOR_RIGHT_IN1);
+L298NController motor_right(MOTOR_RIGHT_EN, MOTOR_RIGHT_IN2, MOTOR_RIGHT_IN1);
 
 // Velocities
 double left_angular_velocity_filter = 0;
@@ -64,25 +62,6 @@ double wheel_cmd_velocity_left = 0;
 double wheel_cmd_velocity_right = 0;
 
 /////////////////////// Function Definitions ////////////////////////////
-
-// Set the PWM value of the motor
-void set_pwm(L298N motor, int pwm_val)
-{
-  if (pwm_val > 0)
-  {
-    motor.setSpeed(pwm_val);
-    motor.forward();
-  }
-  else if (pwm_val < 0)
-  {
-    motor.setSpeed(-pwm_val);
-    motor.backward();
-  }
-  else
-  {
-    motor.stop();
-  }
-}
 
 // Compute the PID output based on the errors and constants
 int pid_compute(double e, double e_d, double e_i)
@@ -127,8 +106,8 @@ void setup()
   msg_measured_joint_states_.effort_length = 2;
 
   nh.advertise(pub_measured_joint_states_);
-  motor_left.stop();
-  motor_right.stop();
+  motor_left.setSpeed(0);
+  motor_right.setSpeed(0);
 
   nh.getHardware()->setBaud(115200);
   nh.initNode();
@@ -150,14 +129,6 @@ void loop()
     JointState joint_state_right = encoder_right.getJointState();
 
     msg_measured_joint_states_.position[0] += joint_state_left.angular_position_;
-    // if (msg_measured_joint_states_.position[0] > 2 * PI)
-    // {
-    //   msg_measured_joint_states_.position[0] -= 2 * PI;
-    // }
-    // if (msg_measured_joint_states_.position[0] < 0)
-    // {
-    //   msg_measured_joint_states_.position[0] += 2 * PI;
-    // }
 
     left_angular_velocity_filter = 0.88 * left_angular_velocity_filter + 0.06 * joint_state_left.angular_velocity_ + 0.06 * left_angular_velocity_prev;
     left_angular_velocity_prev = joint_state_left.angular_velocity_;
@@ -165,14 +136,6 @@ void loop()
     msg_measured_joint_states_.velocity[0] = left_angular_velocity_filter;
 
     msg_measured_joint_states_.position[1] += joint_state_right.angular_position_;
-    // if (msg_measured_joint_states_.position[1] > 2 * PI)
-    // {
-    //   msg_measured_joint_states_.position[1] -= 2 * PI;
-    // }
-    // if (msg_measured_joint_states_.position[1] < 0)
-    // {
-    //   msg_measured_joint_states_.position[1] += 2 * PI;
-    // }
 
     right_angular_velocity_filter = 0.88 * right_angular_velocity_filter + 0.06 * joint_state_right.angular_velocity_ + 0.06 * right_angular_velocity_prev;
     right_angular_velocity_prev = joint_state_right.angular_velocity_;
@@ -187,12 +150,12 @@ void loop()
 
     if (wheel_cmd_velocity_left == 0)
     {
-      set_pwm(motor_left, 0);
+      motor_left.setSpeed(0);
     }
     else
     {
       double left_pwm = pid_compute(left_error, left_d_error, left_i_error);
-      set_pwm(motor_left, (int)left_pwm);
+      motor_left.setSpeed((int)left_pwm);
     }
 
     // Control the right wheel
@@ -203,12 +166,12 @@ void loop()
 
     if (wheel_cmd_velocity_right == 0)
     {
-      set_pwm(motor_right, 0);
+      motor_right.setSpeed(0);
     }
     else
     {
       double right_pwm = pid_compute(right_error, right_d_error, right_i_error);
-      set_pwm(motor_right, (int)right_pwm);
+      motor_right.setSpeed((int)right_pwm);
     }
 
     msg_measured_joint_states_.name = names;

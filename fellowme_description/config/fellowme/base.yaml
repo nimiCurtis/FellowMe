@@ -3,5 +3,5 @@ base:
   radius: 0.17           # Dimension in x axis
   length: 0.11            # Dimension in y axis
   z_size: 0.010           # Dimension in z axis
-  # mesh: 'base_link.STL'  # Name of the mesh files. Leave it empty ('') to have a white base.
-  mesh: ''
+  mesh: 'base_link.STL'  # Name of the mesh files. Leave it empty ('') to have a white base.
+  #mesh: ''
