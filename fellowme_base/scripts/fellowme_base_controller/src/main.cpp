@@ -14,7 +14,6 @@
 using namespace fellowme_msgs;
 
 // Function prototypes
-int pid_compute(double e, double e_d, double e_i);
 void cmd_wheels_callback(const fellowme_msgs::WheelsCmdStamped& cmd_msg);
 
 ros::NodeHandle_<ArduinoHardware, 25, 25, 512, 512> nh;
@@ -31,20 +30,17 @@ EncoderHandler encoder_right(nh, ENCODER_RIGHT_A, ENCODER_RIGHT_B, ENCODER_RESOL
 fellowme_msgs::EncodersStamped encoders_msg;
 ros::Publisher pub_encoders_("fellowme_base/encoders/ticks", &encoders_msg);
 
-// Motor Controller Variables and Constants
-int left_pwm = 0;
-int right_pwm = 0;
-
 // Motor Left connections
 L298NController motor_left(MOTOR_LEFT_EN, MOTOR_LEFT_IN2, MOTOR_LEFT_IN1);
 fellowme::PID motor_pid_left_(PWM_MIN, PWM_MAX, K_P, K_I, K_D);
 
-  
-  
-// Motor Right connections
+// Motor Right connections 
 L298NController motor_right(MOTOR_RIGHT_EN, MOTOR_RIGHT_IN2, MOTOR_RIGHT_IN1);
 fellowme::PID motor_pid_right_(PWM_MIN, PWM_MAX, K_P, K_I, K_D);
 
+// Motor Controller Variables and Constants
+int left_pwm = 0;
+int right_pwm = 0;
 
 // Velocities
 double left_angular_velocity_filter = 0;
@@ -53,40 +49,11 @@ double right_angular_velocity_filter = 0;
 double right_angular_velocity_prev = 0;
 
 // Time interval for measurements in milliseconds
-long previousMillis = 0;
-long currentMillis = 0;
 long prevT = 0;
-
-// PID Constants
-double pre_left_error = 0;
-double left_i_error = 0;
-
-double pre_right_error = 0;
-double right_i_error = 0;
 
 // Wheel Command Velocities
 double wheel_cmd_velocity_left = 0;
 double wheel_cmd_velocity_right = 0;
-
-/////////////////////// Function Definitions ////////////////////////////
-
-// Compute the PID output based on the errors and constants
-int pid_compute(double e, double e_d, double e_i)
-{
-  double pwm_output = K_P * e + K_D * e_d + K_I * e_i;
-
-  // Clamp the PWM output within the allowed range
-  if (pwm_output > PWM_MAX)
-  {
-    pwm_output = PWM_MAX;
-  }
-  else if (pwm_output < PWM_MIN)
-  {
-    pwm_output = PWM_MIN;
-  }
-
-  return pwm_output;
-}
 
 ros::Subscriber<fellowme_msgs::WheelsCmdStamped> cmd_wheels_sub("/fellowme/wheel_cmd_velocities", &cmd_wheels_callback);
 
@@ -153,49 +120,24 @@ void loop()
 
 
     // Control the left wheel
-
-    // double left_error = wheel_cmd_velocity_left - left_angular_velocity_filter;
-    // double left_d_error = (left_error - pre_left_error) / deltaT;
-    // left_i_error += left_error * deltaT;
-    // pre_left_error = left_error;
-
-    // if (wheel_cmd_velocity_left == 0)
-    // {
-    //   motor_left.setSpeed(0);
-    // }
-    // else
-    // {
-    //   double left_pwm = pid_compute(left_error, left_d_error, left_i_error);
-    //   motor_left.setSpeed((int)left_pwm);
-    // }
-
     double left_pwm = motor_pid_left_.compute(wheel_cmd_velocity_left, left_angular_velocity_filter,deltaT);
     motor_left.setSpeed((int)left_pwm);
-    // // Control the right wheel
-    // double right_error = wheel_cmd_velocity_right - right_angular_velocity_filter;
-    // double right_d_error = (right_error - pre_right_error) / deltaT;
-    // right_i_error += right_error * deltaT;
-    // pre_right_error = right_error;
-
-    // if (wheel_cmd_velocity_right == 0)
-    // {
-    //   motor_right.setSpeed(0);
-    // }
-    // else
-    // {
-    //   double right_pwm = pid_compute(right_error, right_d_error, right_i_error);
-    //   motor_right.setSpeed((int)right_pwm);
-    // }
+    
+    
+    // Control the right wheel
     double right_pwm = motor_pid_right_.compute(wheel_cmd_velocity_right, right_angular_velocity_filter,deltaT);
     motor_right.setSpeed((int)right_pwm);
 
+    // set effort and names
     msg_measured_joint_states_.name = names;
     msg_measured_joint_states_.effort[0] = left_pwm;
     msg_measured_joint_states_.effort[1] = right_pwm;
 
+    // set encoders msg
     encoders_msg.encoders.ticks[0] = left_ticks;
     encoders_msg.encoders.ticks[1] = right_ticks;
 
+    // publish msgs
     pub_encoders_.publish(&encoders_msg);
     pub_measured_joint_states_.publish(&msg_measured_joint_states_);
 
