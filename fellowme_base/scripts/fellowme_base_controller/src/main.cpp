@@ -9,6 +9,7 @@
 #include <L298NController.h>
 #include <base_config.h>
 #include <EncoderHandler.h>
+#include <pid.h>
 
 using namespace fellowme_msgs;
 
@@ -36,8 +37,14 @@ int right_pwm = 0;
 
 // Motor Left connections
 L298NController motor_left(MOTOR_LEFT_EN, MOTOR_LEFT_IN2, MOTOR_LEFT_IN1);
+fellowme::PID motor_pid_left_(PWM_MIN, PWM_MAX, K_P, K_I, K_D);
+
+  
+  
 // Motor Right connections
 L298NController motor_right(MOTOR_RIGHT_EN, MOTOR_RIGHT_IN2, MOTOR_RIGHT_IN1);
+fellowme::PID motor_pid_right_(PWM_MIN, PWM_MAX, K_P, K_I, K_D);
+
 
 // Velocities
 double left_angular_velocity_filter = 0;
@@ -109,6 +116,8 @@ void setup()
   motor_left.setSpeed(0);
   motor_right.setSpeed(0);
 
+
+
   nh.getHardware()->setBaud(115200);
   nh.initNode();
   nh.advertise(pub_encoders_);
@@ -142,37 +151,43 @@ void loop()
 
     msg_measured_joint_states_.velocity[1] = right_angular_velocity_filter;
 
+
     // Control the left wheel
-    double left_error = wheel_cmd_velocity_left - left_angular_velocity_filter;
-    double left_d_error = (left_error - pre_left_error) / deltaT;
-    left_i_error += left_error * deltaT;
-    pre_left_error = left_error;
 
-    if (wheel_cmd_velocity_left == 0)
-    {
-      motor_left.setSpeed(0);
-    }
-    else
-    {
-      double left_pwm = pid_compute(left_error, left_d_error, left_i_error);
-      motor_left.setSpeed((int)left_pwm);
-    }
+    // double left_error = wheel_cmd_velocity_left - left_angular_velocity_filter;
+    // double left_d_error = (left_error - pre_left_error) / deltaT;
+    // left_i_error += left_error * deltaT;
+    // pre_left_error = left_error;
 
-    // Control the right wheel
-    double right_error = wheel_cmd_velocity_right - right_angular_velocity_filter;
-    double right_d_error = (right_error - pre_right_error) / deltaT;
-    right_i_error += right_error * deltaT;
-    pre_right_error = right_error;
+    // if (wheel_cmd_velocity_left == 0)
+    // {
+    //   motor_left.setSpeed(0);
+    // }
+    // else
+    // {
+    //   double left_pwm = pid_compute(left_error, left_d_error, left_i_error);
+    //   motor_left.setSpeed((int)left_pwm);
+    // }
 
-    if (wheel_cmd_velocity_right == 0)
-    {
-      motor_right.setSpeed(0);
-    }
-    else
-    {
-      double right_pwm = pid_compute(right_error, right_d_error, right_i_error);
-      motor_right.setSpeed((int)right_pwm);
-    }
+    double left_pwm = motor_pid_left_.compute(wheel_cmd_velocity_left, left_angular_velocity_filter,deltaT);
+    motor_left.setSpeed((int)left_pwm);
+    // // Control the right wheel
+    // double right_error = wheel_cmd_velocity_right - right_angular_velocity_filter;
+    // double right_d_error = (right_error - pre_right_error) / deltaT;
+    // right_i_error += right_error * deltaT;
+    // pre_right_error = right_error;
+
+    // if (wheel_cmd_velocity_right == 0)
+    // {
+    //   motor_right.setSpeed(0);
+    // }
+    // else
+    // {
+    //   double right_pwm = pid_compute(right_error, right_d_error, right_i_error);
+    //   motor_right.setSpeed((int)right_pwm);
+    // }
+    double right_pwm = motor_pid_right_.compute(wheel_cmd_velocity_right, right_angular_velocity_filter,deltaT);
+    motor_right.setSpeed((int)right_pwm);
 
     msg_measured_joint_states_.name = names;
     msg_measured_joint_states_.effort[0] = left_pwm;
