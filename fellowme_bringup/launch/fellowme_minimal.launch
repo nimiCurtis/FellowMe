@@ -14,7 +14,7 @@
   <!-- Run rosserial to connect with the Arduino MEga board connected to the motor encoders -->
   <node name="rosserial_base_controller" pkg="rosserial_python" type="serial_node.py" respawn="false"
       output="screen" ns="fellowme" args="_port:=/dev/ttyACM0
-                                         _baud:=115200"/>
+                                        _baud:=115200"/>
 
   <!-- Including the following launch file from fellowme_base package will -->
   <!-- Load the robot description onto the parameter server -->

@@ -2,6 +2,8 @@
     <!-- Arguments -->
     <!--arg name="model" default="$(env fellowme_MODEL)" doc="model type [fellowme, remo]"/-->
     <arg name="model" default="fellowme"/>
+    <param name="robot_description" command="$(find xacro)/xacro $(find fellowme_description)/urdf/fellowme.urdf.xacro" />
+
     <!-- Launch visualization in rviz -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find fellowme_bringup)/rviz/$(arg model)_bringup.rviz" required="true" />
 </launch>

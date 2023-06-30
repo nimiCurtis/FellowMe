@@ -15,11 +15,22 @@
         <arg name="model" value="$(arg model)" />
     </include>
 
+    <!-- Brings up camera -->
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    </include>
+
     <!-- Starting robot state publish which will publish tf -->
     <!-- This is needed to publish transforms between all links -->
     <!-- diff_drive_controller publishes only a single transfrom between odom and base_footprint -->
     <!-- The robot_state_publisher reads the joint states published by ros control's joint_state_controller -->
-    <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
-        output="screen" ns="fellowme" /> -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+        output="screen" ns="fellowme">
+        <remap from="/joint_states" to="/fellowme/joint_states" /> 
+    </node>
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ns="fellowme"> 
+        <remap from="/joint_states" to="/fellowme/joint_states" />
+    </node>
+    
 </launch>
 

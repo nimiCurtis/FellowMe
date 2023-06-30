@@ -1,0 +1,8 @@
+camera:
+  parent_link: base_link
+  use_nominal_extrinsics: false
+  add_plug: false
+  use_mesh: true
+  dx: 0.17
+  dy: 0
+  dz: 0.001
