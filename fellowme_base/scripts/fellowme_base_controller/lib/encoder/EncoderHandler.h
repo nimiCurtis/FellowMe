@@ -51,6 +51,14 @@ public:
    */
   JointState getJointState();
 
+    /** \brief Set the encoder tick count
+   * 
+   * Mainly used to reset the encoder back to zero.
+   * 
+   * \param p encoder ticks
+   */
+  void write(int32_t p);
+
 private:
   ros::NodeHandle& nh_;       // ROS node handle
   Encoder encoder_;           // Encoder object

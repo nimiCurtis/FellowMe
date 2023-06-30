@@ -68,3 +68,9 @@ double EncoderHandler::computeDeltaAngle(int deltaTicks)
 
     return deltaAngle;
 }
+
+void EncoderHandler::write(int32_t p)
+{
+    // set the encoder count to value of p
+    encoder_.write(p);
+}

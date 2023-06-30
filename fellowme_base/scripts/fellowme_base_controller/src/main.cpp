@@ -10,7 +10,7 @@
 #include <base_config.h>
 #include <EncoderHandler.h>
 #include <pid.h>
-
+// #include <base_controller.h>
 using namespace fellowme_msgs;
 
 // Function prototypes
@@ -48,20 +48,24 @@ double left_angular_velocity_prev = 0;
 double right_angular_velocity_filter = 0;
 double right_angular_velocity_prev = 0;
 
-// Time interval for measurements in milliseconds
-long prevT = 0;
+
 
 // Wheel Command Velocities
 double wheel_cmd_velocity_left = 0;
 double wheel_cmd_velocity_right = 0;
 
 ros::Subscriber<fellowme_msgs::WheelsCmdStamped> cmd_wheels_sub("/fellowme/wheel_cmd_velocities", &cmd_wheels_callback);
+// Time interval for measurements in milliseconds
+ros::Time prevT = nh.now();
+// float prevT = 0;
+ros::Time command_t;
 
 // Callback function for the wheel command velocity subscriber
 void cmd_wheels_callback(const fellowme_msgs::WheelsCmdStamped& cmd_msg)
 {
   wheel_cmd_velocity_left = cmd_msg.wheels_cmd.angular_velocities.joint[0];
   wheel_cmd_velocity_right = cmd_msg.wheels_cmd.angular_velocities.joint[1];
+  command_t = nh.now();
 }
 
 void setup()
@@ -96,10 +100,17 @@ void loop()
   int left_ticks = encoder_left.getTicks();
   int right_ticks = encoder_right.getTicks();
 
-  long currT = micros();
-  float deltaT = ((float)(currT - prevT)) / 1.0e6;
+  ros::Time currT = nh.now();
+  ros::Duration dt = currT - prevT;
+  ros::Duration command_dt = currT - command_t;
+  if (command_dt.toSec() > E_STOP_COMMAND_RECEIVED_DURATION){
+    wheel_cmd_velocity_left = 0;
+    wheel_cmd_velocity_right = 0;
+  }
+  // float deltaT = ((currT - prevT)) / 1.0e6;
 
-  if (deltaT >= 0.05)
+  // if (deltaT >= 0.05)
+  if (dt.toSec() >= 0.05)
   {
     JointState joint_state_left = encoder_left.getJointState();
     JointState joint_state_right = encoder_right.getJointState();
@@ -120,12 +131,12 @@ void loop()
 
 
     // Control the left wheel
-    double left_pwm = motor_pid_left_.compute(wheel_cmd_velocity_left, left_angular_velocity_filter,deltaT);
+    double left_pwm = motor_pid_left_.compute(wheel_cmd_velocity_left, left_angular_velocity_filter,dt.toSec());
     motor_left.setSpeed((int)left_pwm);
     
     
     // Control the right wheel
-    double right_pwm = motor_pid_right_.compute(wheel_cmd_velocity_right, right_angular_velocity_filter,deltaT);
+    double right_pwm = motor_pid_right_.compute(wheel_cmd_velocity_right, right_angular_velocity_filter,dt.toSec());
     motor_right.setSpeed((int)right_pwm);
 
     // set effort and names
@@ -145,7 +156,5 @@ void loop()
   }
   nh.spinOnce();
 }
-
-
 
 
