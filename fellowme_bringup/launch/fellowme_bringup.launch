@@ -15,7 +15,7 @@
         <arg name="model" value="$(arg model)" />
     </include>
 
-    <!-- Brings up camera -->
+    <!-- Bringup camera -->
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
     </include>
 
