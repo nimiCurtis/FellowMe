@@ -28,6 +28,6 @@ class Tag2Path:
 
 
 if __name__ == '__main__':
-    rospy.init_node('tag_to_path_node')
+    rospy.init_node('fellowme_tag2path')
     tag_to_path = Tag2Path()
     rospy.spin()
