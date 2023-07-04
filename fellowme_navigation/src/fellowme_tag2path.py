@@ -9,7 +9,7 @@ from tf import TransformListener
 
 class Tag2Path:
     def __init__(self):
-        self.path_pub = rospy.Publisher('/tag_detections_trajectory', Path, latch=True, queue_size=10)
+        self.path_pub = rospy.Publisher('/tag_detections_trajectory', Path, latch=True, queue_size=1000)
         self.apritag_sub = rospy.Subscriber('/tag_detections', AprilTagDetectionArray,self.tag_to_path)
         self.path = Path()
         self.tl = TransformListener()
@@ -20,10 +20,11 @@ class Tag2Path:
             tag_pose = PoseStamped()
             tag_pose.header = msg.detections[-1].pose.header
             tag_pose.pose = msg.detections[-1].pose.pose.pose
-            tag_in_base_link = self.tl.transformPose(target_frame='base_link',ps=tag_pose)
+            tag_in_odom = self.tl.transformPose(target_frame='/odom',ps=tag_pose)
             
-            self.path.header = tag_in_base_link.header
-            self.path.poses.append(tag_in_base_link)
+            
+            self.path.header = tag_in_odom.header
+            self.path.poses.append(tag_in_odom)
             self.path_pub.publish(self.path)
 
 

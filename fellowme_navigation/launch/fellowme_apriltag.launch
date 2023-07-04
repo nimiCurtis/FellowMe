@@ -22,8 +22,6 @@
     <rosparam command="load" file="$(find fellowme_navigation)/params/apriltag/tags.yaml"/>
   </node>
 
-
-
   <!-- Launch tag to path node -->
   <node pkg="fellowme_navigation" type="fellowme_tag2path.py" name="fellowme_tag2path" output="screen" />
 

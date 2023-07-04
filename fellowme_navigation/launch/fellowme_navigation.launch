@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- Launch apriltag -->
+    <include file="$(find fellowme_navigation)/launch/fellowme_apriltag.launch"/>
+    
+    <!-- Launch move_base -->
+    <include file="$(find fellowme_navigation)/launch/fellowme_move_base.launch"/>
+
+
+</launch>

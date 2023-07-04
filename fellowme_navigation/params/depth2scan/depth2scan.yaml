@@ -1,0 +1,5 @@
+scan_height: 1                        # Number of pixel rows used to generate laser scan
+scan_time: 0.033                      # Time between scans
+range_min: 0.1                        # Ranges less than this are considered -Inf
+range_max: 4                          # Ranges more than this are considered +Inf
+output_frame_id: camera_depth_frame   # Frame id of the laser scan

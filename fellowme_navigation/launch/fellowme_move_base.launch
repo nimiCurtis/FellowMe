@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- Launch depth2scan node -->
+    <include file="$(find fellowme_navigation)/launch/fellowme_depth2scan.launch"/>
+    
+    <!-- Launch move_base node  -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <!-- Remap subscribed topics -->
+        <remap from="/cmd_vel" to="/fellowme/mobile_base_controller/cmd_vel"/>
+        <remap from="/odom" to="/fellowme/mobile_base_controller/odom"/>
+        
+        <!-- Load move_base parameters -->
+        <rosparam file="$(find fellowme_navigation)/params/move_base/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+        <rosparam file="$(find fellowme_navigation)/params/move_base/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+        <rosparam file="$(find fellowme_navigation)/params/move_base/local_costmap_params.yaml" command="load"/>
+        <rosparam file="$(find fellowme_navigation)/params/move_base/global_costmap_params.yaml" command="load"/>
+        <rosparam file="$(find fellowme_navigation)/params/move_base/base_local_planner_params.yaml" command="load"/>
+        <rosparam file="$(find fellowme_navigation)/params/move_base/move_base_params.yaml" command="load"/>
+    </node>
+
+</launch>
