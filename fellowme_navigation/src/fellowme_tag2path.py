@@ -21,8 +21,6 @@ class Tag2Path:
             tag_pose.header = msg.detections[-1].pose.header
             tag_pose.pose = msg.detections[-1].pose.pose.pose
             tag_in_odom = self.tl.transformPose(target_frame='/odom',ps=tag_pose)
-            
-            
             self.path.header = tag_in_odom.header
             self.path.poses.append(tag_in_odom)
             self.path_pub.publish(self.path)

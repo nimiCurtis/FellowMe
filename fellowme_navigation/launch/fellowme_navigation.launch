@@ -1,11 +1,16 @@
 <?xml version="1.0"?>
 <launch>
 
+    <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom"/>
+
     <!-- Launch apriltag -->
     <include file="$(find fellowme_navigation)/launch/fellowme_apriltag.launch"/>
     
     <!-- Launch move_base -->
     <include file="$(find fellowme_navigation)/launch/fellowme_move_base.launch"/>
 
+    <node name="move_base_sequence" pkg="move_base_sequence" type="server.py">
+        <rosparam file="$(find fellowme_navigation)/params/move_base/move_base_sequence.yaml" command="load"/>
+    </node>
 
 </launch>
