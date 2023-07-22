@@ -22,6 +22,7 @@ class NavNode():
         self.move_base_seq_pub = rospy.Publisher('/move_base_sequence/corner_pose',PoseStamped,queue_size=10)
         self.tl = TransformListener()
         self.robot_pose = Pose()
+        self.last_goal_pose = PoseStamped()
         self.tag_in_base = PoseStamped()
         self.odom_recieved = False
         self.tag_recieved = False
@@ -36,8 +37,8 @@ class NavNode():
             tag_pose = PoseStamped()
             tag_pose.header = msg.detections[-1].pose.header
             tag_pose.pose = msg.detections[-1].pose.pose.pose
-            self.tag_in_base = self.tl.transformPose(target_frame='/base_link',ps=tag_pose)
-            
+            self.tag_in_base = self.tl.transformPose(target_frame='/base_footprint',ps=tag_pose)
+
 
     def send_goal(self):
         if self.tag_recieved and self.odom_recieved:
@@ -70,24 +71,31 @@ class NavNode():
             goal_pose.pose.orientation.y = 0
             goal_pose.pose.orientation.z = goal_orientation_quat[2]
             goal_pose.pose.orientation.w = goal_orientation_quat[3]
-            
-            
-        
-            self.move_base_seq_pub.publish(goal_pose)
+
+            if self.distance_thresh(self.robot_pose,goal_pose,0.3+0.17):
+                print("robot dist requirment!")
+                if self.distance_thresh(self.last_goal_pose,goal_pose,0.1):
+                    print("goal dist requirment")
+                    self.move_base_seq_pub.publish(goal_pose)
+                    self.last_goal_pose = goal_pose
     
+    def distance_thresh(self,pose1,pose2,thresh):
+        pose1_xy_pos = np.array([pose1.pose.position.x,pose1.pose.position.y])
+        pose2_xy_pos = np.array([pose2.pose.position.x,pose2.pose.position.y])
+        d = np.linalg.norm(pose1_xy_pos-pose2_xy_pos)
+        return d >= thresh 
+        
 # If the python node is executed as main process (sourced directly)
 if __name__ == '__main__':
     try:
        # Initializes a rospy node to let the SimpleActionClient publish and subscribe
         nav = NavNode()
         
-        rate = rospy.Rate(15)
+        rate = rospy.Rate(20)
         while not rospy.is_shutdown():
             nav.send_goal()
             rate.sleep()
-        
-        
+
+
     except rospy.ROSInterruptException:
         rospy.loginfo("Navigation test finished.")
-        
-        
