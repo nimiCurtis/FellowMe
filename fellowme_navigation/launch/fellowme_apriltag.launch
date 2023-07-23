@@ -23,7 +23,7 @@
   </node>
 
   <!-- Launch tag to path node -->
-  <node pkg="fellowme_navigation" type="fellowme_tag2path.py" name="fellowme_tag2path" output="screen" />
+  <!-- <node pkg="fellowme_navigation" type="fellowme_tag2path.py" name="fellowme_tag2path" output="screen" /> -->
 
 
 </launch>

@@ -69,6 +69,10 @@ add_service_files(
   FILES
   PwmVal.srv
   WheelsCmdSrv.srv
+  get_state.srv
+  set_state.srv
+  toggle_state.srv
+  reset.srv
 )
 
 ## Generate actions in the 'action' folder

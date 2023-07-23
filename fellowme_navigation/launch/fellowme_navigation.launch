@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<launch>
 
+<launch>
+    <arg name="model" default="fellowme"/>
     <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom"/>
 
     <!-- Launch apriltag -->
@@ -9,8 +10,12 @@
     <!-- Launch move_base -->
     <include file="$(find fellowme_navigation)/launch/fellowme_move_base.launch"/>
 
-    <node name="move_base_sequence" pkg="move_base_sequence" type="server.py">
+    <node name="move_base_seq_server" 
+            pkg="fellowme_navigation" 
+            type="fellowme_move_base_seq_server.py">
+        <param name="topics_prefix" value="$(arg model)/fellowme_navigation"/> 
         <rosparam file="$(find fellowme_navigation)/params/move_base/move_base_sequence.yaml" command="load"/>
+
     </node>
 
 </launch>

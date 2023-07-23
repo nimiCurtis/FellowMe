@@ -3,7 +3,7 @@
 #footprint: [] # Specification for the footprint of the robot
 #footprint_padding: 0.03
 robot_radius: 0.18
-global_frame: odom
+global_frame: map
 robot_base_frame: base_footprint # The name of the frame for the base link of the robot
 publish_frequency: 5 # The frequency in Hz for the map to be publish display information
 transform_tolerance: 0.5 # Specifies the delay in transform (tf) data that is tolerable in seconds
@@ -15,15 +15,15 @@ max_obstacle_height: 0.60  # assume something like an arm is mounted on top of t
 
 
 plugins: 
-  # - {name: static_map,type: "costmap_2d::StaticLayer"}
   - {name: obstacles,type: "costmap_2d::ObstacleLayer"}
   - {name: inflation_layer,type: "costmap_2d::InflationLayer"}
+  # - {name: static_map,type: "costmap_2d::StaticLayer"}
 
 # # http://wiki.ros.org/costmap_2d/hydro/staticmap
 # static_map:
-#   enable: false
+#   enable: true
 #   map_topic: /map
-#   subscribe_to_updates: false
+#   subscribe_to_updates: true
 #   rolling_window: true
 #   width: 6.0
 #   height: 6.0
@@ -42,7 +42,7 @@ obstacles:
 
 # http://wiki.ros.org/costmap_2d/hydro/inflation
 inflation_layer:
-  inflation_radius: 0.3
+  inflation_radius: 0.25
 
 
 
