@@ -162,7 +162,7 @@ class move_base_sequence():
         #rospy.loginfo("Feedback for goal "+str(self.goal_cnt)+": "+str(feedback))
         pass
 
- 
+
     def done_cb(self, status, result):
         # Reference for terminal status values: http://docs.ros.org/diamondback/api/actionlib_msgs/html/msg/GoalStatus.html
         if status == 2:
@@ -219,14 +219,15 @@ class move_base_sequence():
     def move_base_client(self):
         if  self._sending or not self.__state__: return
         else:
-          self._sending = True #don't send as it has already sent a goal thats being served
-          goal = MoveBaseGoal()
-          goal.target_pose.header.frame_id = "map"
-          goal.target_pose.header.stamp = rospy.Time.now() 
-          goal.target_pose.pose = self.poses.poses[self._i]
-          rospy.loginfo("Sending goal pose "+str(self._i)+" to Action Server")
-          #rospy.loginfo(str(self.poses.poses[self._i]))  
-          self.client.send_goal(goal, self.done_cb, self.active_cb, self.feedback_cb)
+            self._sending = True #don't send as it has already sent a goal thats being served
+            goal = MoveBaseGoal()
+            goal.target_pose.header.frame_id = "map"
+            goal.target_pose.header.stamp = rospy.Time.now() 
+            goal.target_pose.pose = self.poses.poses[self._i]
+            rospy.loginfo(str(self.poses.poses[self._i]))  
+            rospy.loginfo("Sending goal pose "+str(self._i)+" to Action Server")
+            rospy.loginfo(str(self.poses.poses[self._i]))  
+            self.client.send_goal(goal, self.done_cb, self.active_cb, self.feedback_cb)
 
 
 

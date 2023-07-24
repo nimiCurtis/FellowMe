@@ -79,7 +79,7 @@ class NavNode():
 
                 if self.distance_thresh(self.robot_pose,goal_pose,0.3+0.17):
                     print("robot dist requirment!")
-                    if self.distance_thresh(self.last_goal_pose,goal_pose,0.1):
+                    if self.distance_thresh(self.last_goal_pose,goal_pose,0.3):
                         print("goal dist requirment")
                         self.move_base_seq_pub.publish(goal_pose)
                         self.last_goal_pose = goal_pose

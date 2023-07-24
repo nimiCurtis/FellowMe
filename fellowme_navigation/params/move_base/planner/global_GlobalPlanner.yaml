@@ -1,0 +1,13 @@
+# http://wiki.ros.org/global_planner
+
+base_global_planner: global_planner/GlobalPlanner
+
+GlobalPlanner:
+
+  visualize_potential: false # Specifies whether or not to visualize the potential area computed by navfn via a PointCloud2
+  allow_unknown: True # Specifies whether or not to allow navfn to create plans that traverse unknown space.  use_dijkstra: true
+  use_dijkstra: false  # If true, use dijkstra's algorithm. Otherwise, A*.
+  use_grid_path: false # If true, create a path that follows the grid boundaries. Otherwise, use a gradient descent method.
+  use_quadratic: true # If true, use the quadratic approximation of the potential. Otherwise, use a simpler calculation
+  orientation_mode: 0 # How to set the orientation of each point (None=0, Forward=1, Interpolate=2, ForwardThenInterpolate=3, Backward=4, Leftward=5, Rightward=6) (dynamic reconfigure)
+  default_tolerance: 0.1 # A tolerance on the goal point for the planner.

@@ -1,0 +1,8 @@
+# http://wiki.ros.org/navfn
+
+base_global_planner: navfn/NavfnROS
+
+NavfnROS:
+  visualize_potential: false # Specifies whether or not to visualize the potential area computed by navfn via a PointCloud2
+  allow_unknown: false # Specifies whether or not to allow navfn to create plans that traverse unknown space.
+  default_tolerance: 0.1 # A tolerance on the goal point for the planner.
