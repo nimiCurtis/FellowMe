@@ -4,22 +4,23 @@ base_local_planner: dwa_local_planner/DWAPlannerROS
 
 DWAPlannerROS:
 
-  ## Robot configuration parameters - PAL ##
+  ## Robot configuration parameters - FellowMe ##
   
   # accel:
-  acc_lim_x: 1 # The x acceleration limit of the robot in meters/sec^2
+  acc_lim_x: 0.5 # The x acceleration limit of the robot in meters/sec^2
+  acc_lim_trans: 0.5
   acc_lim_y: 0 # diff drive robot
   acc_lim_th: 1 # The rotational acceleration limit of the robot in radians/sec^2
 
   # vel:
-  max_vel_x: 0.6 # The maximum x velocity for the robot in m/s
-  min_vel_x: -0.15 # The minimum x velocity for the robot in m/s, negative for backwards motion
+  max_vel_x: 1.0 # The maximum x velocity for the robot in m/s
+  min_vel_x: 0.2 # The minimum x velocity for the robot in m/s, negative for backwards motion
   max_vel_y: 0 # diff drive robot
   min_vel_y: 0 # diff drive robot
   max_vel_theta: 3.0  # choose slightly less than the base's capability
   min_vel_theta: 0.1  # this is the min angular velocity when there is negligible translational velocity
-  max_vel_trans: 0.6 # choose slightly less than the base's capability
-  min_vel_trans: 0.1  # this is the min trans velocity when there is negligible rotational velocity
+  max_vel_trans: 1.5 # choose slightly less than the base's capability
+  min_vel_trans: 0.2  # this is the min trans velocity when there is negligible rotational velocity
 
   ## Goal Tolerance Parameters ##
   # yaw_goal_tolerance: 0.05
@@ -28,11 +29,11 @@ DWAPlannerROS:
   latch_xy_goal_tolerance: false # If goal tolerance is latched, if the robot ever reaches the goal xy location it will simply rotate in place, even if it ends up outside the goal tolerance while it is doing so.
 
   ## Forward Simulation Parameters ##
-  sim_time: 0.5 # The amount of time to forward-simulate trajectories in seconds
-  sim_granularity: 0.05 # The step size, in meters, to take between points on a given trajectory
-  vx_samples: 5 # The number of samples to use when exploring the x velocity space
-  vy_samples: 1 # he number of samples to use when exploring the y velocity space
-  vtheta_samples: 20
+  sim_time: 4 # The amount of time to forward-simulate trajectories in seconds
+  sim_granularity: 0.1 # The step size, in meters, to take between points on a given trajectory
+  vx_samples: 20 # The number of samples to use when exploring the x velocity space
+  vy_samples: 0 # he number of samples to use when exploring the y velocity space
+  vtheta_samples: 40
 
   ## Trajectory scoring parameters ## 
   #The cost function used to score each trajectory is in the following form:
@@ -40,21 +41,21 @@ DWAPlannerROS:
   # path_distance_bias * (distance to path from the endpoint of the trajectory in meters)
   # + goal_distance_bias * (distance to local goal from the endpoint of the trajectory in meters)
   # + occdist_scale * (maximum obstacle cost along the trajectory in obstacle cost (0-254))
-  path_distance_bias: 64.0      # (default) 32.0   - weighting for how much it should stick to the global path plan
+  path_distance_bias: 32.0      # (default) 32.0   - weighting for how much it should stick to the global path plan
   goal_distance_bias: 24.0      # (default) 24.0   - weighting for how much it should attempt to reach its goal
-  occdist_scale: 0.5            # (default) 0.01   - weighting for how much the controller should avoid obstacles
+  occdist_scale: 0.01            # (default) 0.01   - weighting for how much the controller should avoid obstacles
   forward_point_distance: 0.325 # (default) 0.325  - how far along to place an additional scoring point
-  stop_time_buffer: 0.1         # (default) 0.2    - amount of time a robot must stop in before colliding for a valid traj.
-  scaling_speed: 0.2           # (default) 0.25   - absolute velocity at which to start scaling the robot's footprint
+  stop_time_buffer: 1         # (default) 0.2    - amount of time a robot must stop in before colliding for a valid traj.
+  scaling_speed: 0.25           # (default) 0.25   - absolute velocity at which to start scaling the robot's footprint
   max_scaling_factor: 0.2       # (default) 0.2    - how much to scale the robot's footprint when at speed.
 
   ## Oscillation Prevention Parameters ##
-  oscillation_reset_dist: 0.05  # 0.05   - how far to travel before resetting oscillation flags
+  oscillation_reset_dist: 0.01  # 0.05   - how far to travel before resetting oscillation flags
 
   ## Debugging ##
   publish_traj_pc : true
   publish_cost_grid_pc: true
-  global_frame_id: odom
+  global_frame_id: map
 
 
   ## Differential-drive robot configuration - necessary? ##

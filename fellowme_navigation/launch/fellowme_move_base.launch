@@ -18,11 +18,13 @@
         <rosparam file="$(find fellowme_navigation)/params/move_base/costmap/global_costmap_params.yaml" command="load"/>
         
         <!-- # planner global -->
-        <rosparam file="$(find fellowme_navigation)/params/move_base/planner/global_CarrotPlanner.yaml" command="load" />
+        <!-- <rosparam file="$(find fellowme_navigation)/params/move_base/planner/global_CarrotPlanner.yaml" command="load" /> -->
+        <rosparam file="$(find fellowme_navigation)/params/move_base/planner/global_GlobalPlanner.yaml" command="load" />
 
         <!-- # planner local -->
         <rosparam file="$(find fellowme_navigation)/params/move_base/planner/local_DWAPlanner.yaml" command="load" /> 
-        
+        <!-- <rosparam file="$(find fellowme_navigation)/params/move_base/planner/local_TebPlanner.yaml" command="load" />  -->
+
         <!-- # move base -->
         <rosparam file="$(find fellowme_navigation)/params/move_base/move_base_params.yaml" command="load"/>
     </node>

@@ -12,11 +12,12 @@ TebLocalPlannerROS:
 
   teb_autosize: True
   dt_ref: 0.3 # Desired temporal resolution of the trajectory (the trajectory is not fixed to dt_ref since the temporal resolution is part of the optimization, but the trajectory will be resized between iterations if dt_ref +-dt_hysteresis is violated
-  dt_hysteresis: 0.05 # Hysteresis for automatic resizing depending on the current temporal resolution, usually approx. 10% of dt_ref is recommended
+  dt_hysteresis: 0.1 # Hysteresis for automatic resizing depending on the current temporal resolution, usually approx. 10% of dt_ref is recommended
   min_samples: 5 # Minimum number of samples (should be always greater than 2)
+  max_samples: 10
   global_plan_overwrite_orientation: True # Overwrite orientation of local subgoals provided by the global planner (since they often provide only a 2D path)
   allow_init_with_backwards_motion: False # If true, underlying trajectories might be initialized with backwards motions in case the goal is behind the start within the local costmap (this is only recommended if the robot is equipped with rear sensors).
-  max_global_plan_lookahead_dist: 5.0 # Specify the maximum length (cumulative Euclidean distances) of the subset of the global plan taken into account for optimization.
+  max_global_plan_lookahead_dist: 3.0 # Specify the maximum length (cumulative Euclidean distances) of the subset of the global plan taken into account for optimization.
   global_plan_viapoint_sep: -1 # ?
   global_plan_prune_distance: 1 # ?
   exact_arc_length: False
@@ -25,9 +26,9 @@ TebLocalPlannerROS:
 
   # Robot
 
-  max_vel_x: 0.6 # Maximum translational velocity of the robot in meters/sec
+  max_vel_x: 1.0 # Maximum translational velocity of the robot in meters/sec
   max_vel_x_backwards: 0.2 # Maximum absolute translational velocity of the robot while driving backwards in meters/sec. See optimization parameter weight_kinematics_forward_drive
-  max_vel_theta: 3.0 # Maximum angular velocity of the robot in radians/sec
+  max_vel_theta: 2.0 # Maximum angular velocity of the robot in radians/sec
   acc_lim_x: 0.5 # Maximum translational acceleration of the robot in meters/sec^2
   acc_lim_theta: 0.5 # Maximum angular acceleration of the robot in radians/sec^2
   min_turning_radius: 0.0 # diff-drive robot (can turn on place!)
@@ -38,15 +39,15 @@ TebLocalPlannerROS:
 
   # GoalTolerance
 
-  xy_goal_tolerance: 0.1 # Allowed final euclidean distance to the goal position in meters
+  xy_goal_tolerance: 0.2 # Allowed final euclidean distance to the goal position in meters
   yaw_goal_tolerance: 0.1  # Allowed final orientation error in radians
   free_goal_vel: False # Remove the goal velocity constraint such that the robot can arrive at the goal with maximum speed
   complete_global_plan: True
 
   # Obstacles
 
-  min_obstacle_dist: 0.17 # Minimum desired separation from obstacles in meters
-  inflation_dist: 0.2 # Buffer zone around obstacles with non-zero penalty costs (should be larger than min_obstacle_dist in order to take effect). Also refer to the weight weight_inflation.
+  min_obstacle_dist: 0.3 # Minimum desired separation from obstacles in meters
+  inflation_dist: 0.25 # Buffer zone around obstacles with non-zero penalty costs (should be larger than min_obstacle_dist in order to take effect). Also refer to the weight weight_inflation.
   include_costmap_obstacles: True # Specify if obstacles of the local costmap should be taken into account
   costmap_obstacles_behind_robot_dist: 0.5 # Limit the occupied local costmap obstacles taken into account for planning behind the robot (specify distance in meters).
   obstacle_poses_affected: 30 #?
@@ -70,7 +71,7 @@ TebLocalPlannerROS:
   weight_acc_lim_x: 1
   weight_acc_lim_theta: 1
   weight_kinematics_nh: 1000
-  weight_kinematics_forward_drive: 2 # Optimization weight for forcing the robot to choose only forward directions (positive transl. velocities). A small weight (e.g. 1.0) still allows driving backwards. A value around 1000 almost prevents backward driving (but cannot be guaranteed).
+  weight_kinematics_forward_drive: 1 # Optimization weight for forcing the robot to choose only forward directions (positive transl. velocities). A small weight (e.g. 1.0) still allows driving backwards. A value around 1000 almost prevents backward driving (but cannot be guaranteed).
   weight_kinematics_turning_radius: 1 # Optimization weight for enforcing a minimum turning radius (only for carlike robots).
   weight_optimaltime: 1 # must be > 0
   weight_shortest_path: 0

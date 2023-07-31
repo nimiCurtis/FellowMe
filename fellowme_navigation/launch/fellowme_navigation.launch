@@ -12,7 +12,8 @@
 
     <node name="move_base_seq_server" 
             pkg="fellowme_navigation" 
-            type="fellowme_move_base_seq_server.py">
+            type="fellowme_move_base_seq_server.py"
+            output="screen">
         <param name="topics_prefix" value="$(arg model)/fellowme_navigation"/> 
         <rosparam file="$(find fellowme_navigation)/params/move_base/move_base_sequence.yaml" command="load"/>
 
