@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /PoseWithCovariance1
       Splitter Ratio: 0.5
     Tree Height: 274
   - Class: rviz/Selection
@@ -120,9 +121,13 @@ Visualization Manager:
           Value: true
         left_wheel:
           Value: true
+        map:
+          Value: true
         odom:
           Value: true
         right_wheel:
+          Value: true
+        tag_5:
           Value: true
       Marker Alpha: 1
       Marker Scale: 0.3499999940395355
@@ -131,21 +136,23 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        odom:
-          base_footprint:
-            base_link:
-              camera_bottom_screw_frame:
-                camera_link:
-                  camera_color_frame:
-                    camera_color_optical_frame:
-                      {}
-                  camera_depth_frame:
-                    camera_depth_optical_frame:
-                      {}
-              left_wheel:
-                {}
-              right_wheel:
-                {}
+        map:
+          odom:
+            base_footprint:
+              base_link:
+                camera_bottom_screw_frame:
+                  camera_link:
+                    camera_color_frame:
+                      camera_color_optical_frame:
+                        tag_5:
+                          {}
+                    camera_depth_frame:
+                      camera_depth_optical_frame:
+                        {}
+                left_wheel:
+                  {}
+                right_wheel:
+                  {}
       Update Interval: 0
       Value: true
     - Class: rviz/Image
@@ -270,6 +277,37 @@ Visualization Manager:
       Unreliable: false
       Use Timestamp: false
       Value: true
+    - Alpha: 1
+      Axes Length: 0.009999999776482582
+      Axes Radius: 0.05000000074505806
+      Class: rviz/PoseWithCovariance
+      Color: 255; 25; 0
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Head Length: 0
+      Head Radius: 0.009999999776482582
+      Name: PoseWithCovariance
+      Queue Size: 10
+      Shaft Length: 0.10000000149011612
+      Shaft Radius: 0.009999999776482582
+      Shape: Axes
+      Topic: /kf/tag_detections_in_base
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -298,7 +336,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 5.232391357421875
+      Distance: 3.3865699768066406
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -306,17 +344,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.018154215067625046
-        Y: 0.09317943453788757
-        Z: 0.0795343741774559
+        X: 0.718547523021698
+        Y: 0.2958894968032837
+        Z: -0.027497868984937668
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9003973007202148
+      Pitch: 0.7003977298736572
       Target Frame: <Fixed Frame>
-      Yaw: 5.323558807373047
+      Yaw: 4.773594379425049
     Saved: ~
 Window Geometry:
   Displays:
