@@ -12,50 +12,69 @@ from tf import TransformListener
 from tf.transformations import *
 
 class TagTransformerNode:
-    
     def __init__(self):
-        self.path_pub = rospy.Publisher('/tag_detections_trajectory', Path, latch=True, queue_size=1000)
-        self.tag_base_pose_pub = rospy.Publisher('/tag_detections_in_base', PoseWithCovarianceStamped, queue_size=1000)
-        self.apritag_sub = rospy.Subscriber('/tag_detections', AprilTagDetectionArray,self.tag_callback)
+        """
+        Initializes the TagTransformerNode.
+        """
+        rospy.init_node('fellowme_tag_transformer')
+        
+        # Publishers for projected tag pose and path
+        self.path_pub = rospy.Publisher('/tag_detections/projected/path', Path, latch=True, queue_size=1000)
+        self.tag_pose_projected_pub = rospy.Publisher('/tag_detections/projected', PoseStamped, queue_size=1000)
+        
+        # Subscriber for raw AprilTag detections
+        self.apriltag_sub = rospy.Subscriber('/tag_detections', AprilTagDetectionArray, self.tag_callback)
+        
+        # Path and TransformListener initialization
         self.path = Path()
         self.tl = TransformListener()
-        self.initial_covariance = rospy.get_param('/apriltag_ros_continuous_node/initial_estimate_pose_covariance')
 
-    def get_tag_transformed(self,tag_pose,target_frame):
-        if self.tl.canTransform(target_frame,'camera_color_optical_frame', rospy.Time()):
-            tag_in_odom = self.tl.transformPose(target_frame=target_frame,ps=tag_pose)
+    def get_tag_transformed(self, tag_pose, target_frame):
+        """
+        Transforms tag pose to the specified target frame.
+        """
+        if self.tl.canTransform(target_frame, 'camera_color_optical_frame', rospy.Time()):
+            tag_in_odom = self.tl.transformPose(target_frame=target_frame, ps=tag_pose)
             return tag_in_odom
         else:
             rospy.logwarn("AR tag transform error")
             return None
         
-    def tag_recieved(self,detections_list):
-        return len(detections_list)>0
+    def tag_received(self, detections_list):
+        """
+        Checks if AprilTag detections are received.
+        """
+        return len(detections_list) > 0
 
-    def tag_callback(self, msg:AprilTagDetectionArray):
-            tag_pose = PoseStamped()
-            tag_pose_in_base_with_cov = PoseWithCovarianceStamped()
-            if self.tag_recieved(msg.detections):
-                tag_pose.header = msg.detections[-1].pose.header
-                tag_pose.pose = msg.detections[-1].pose.pose.pose
-                
-                tag_in_base = self.get_tag_transformed(tag_pose=tag_pose,target_frame='base_link')
-                
-                tag_in_odom = self.get_tag_transformed(tag_pose=tag_pose,target_frame='odom')
+    def tag_callback(self, msg: AprilTagDetectionArray):
+        """
+        Callback function for AprilTag detections.
+        """
+        tag_pose = PoseStamped()
+        if self.tag_received(msg.detections):
+            tag_pose.header = msg.detections[-1].pose.header
+            tag_pose.pose = msg.detections[-1].pose.pose.pose
 
-                if tag_in_odom is not None:
-                    self.path.header = tag_in_odom.header
-                    self.path.poses.append(tag_in_odom)
-                    self.path_pub.publish(self.path)
+            tag_in_base = self.get_tag_transformed(tag_pose=tag_pose, target_frame='base_link')
+            
+            # Projected tag (set z position and orientation x, y to zero)
+            tag_in_base.pose.position.z = 0
+            tag_in_base.pose.orientation.x = 0
+            tag_in_base.pose.orientation.y = 0
+            
+            tag_in_map = self.get_tag_transformed(tag_pose=tag_pose, target_frame='map')
 
-                if tag_in_base is not None:
-                    tag_pose_in_base_with_cov.header = tag_in_base.header
-                    tag_pose_in_base_with_cov.pose.pose = tag_in_base.pose
-                    tag_pose_in_base_with_cov.pose.covariance = self.initial_covariance
-                    self.tag_base_pose_pub.publish(tag_pose_in_base_with_cov)
+            if tag_in_map is not None:
+                self.path.header = tag_in_map.header
+                self.path.poses.append(tag_in_map)
+                self.path_pub.publish(self.path)
 
+            if tag_in_base is not None:
+                self.tag_pose_projected_pub.publish(tag_in_base)
 
 if __name__ == '__main__':
-    rospy.init_node('fellowme_tag_transformer')
-    tag_to_path = TagTransformerNode()
-    rospy.spin()
+    try:
+        transform_tag = TagTransformerNode()
+        rospy.spin()
+    except rospy.ROSInterruptException:
+        rospy.loginfo("Tag transformation finished.")

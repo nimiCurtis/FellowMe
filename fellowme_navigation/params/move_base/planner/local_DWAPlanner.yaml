@@ -13,8 +13,8 @@ DWAPlannerROS:
   acc_lim_th: 1 # The rotational acceleration limit of the robot in radians/sec^2
 
   # vel:
-  max_vel_x: 1.0 # The maximum x velocity for the robot in m/s
-  min_vel_x: 0.2 # The minimum x velocity for the robot in m/s, negative for backwards motion
+  max_vel_x: 1.2 # The maximum x velocity for the robot in m/s
+  min_vel_x: -0.2 # The minimum x velocity for the robot in m/s, negative for backwards motion
   max_vel_y: 0 # diff drive robot
   min_vel_y: 0 # diff drive robot
   max_vel_theta: 3.0  # choose slightly less than the base's capability

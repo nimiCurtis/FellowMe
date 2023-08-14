@@ -19,7 +19,7 @@
         
         <!-- # planner global -->
         <!-- <rosparam file="$(find fellowme_navigation)/params/move_base/planner/global_CarrotPlanner.yaml" command="load" /> -->
-        <rosparam file="$(find fellowme_navigation)/params/move_base/planner/global_GlobalPlanner.yaml" command="load" />
+        <rosparam file="$(find fellowme_navigation)/params/move_base/planner/global_CarrotPlanner.yaml" command="load" />
 
         <!-- # planner local -->
         <rosparam file="$(find fellowme_navigation)/params/move_base/planner/local_DWAPlanner.yaml" command="load" /> 

@@ -20,7 +20,7 @@
     <!-- load parameters (incl. tag family, tags, etc.) -->
     <rosparam command="load" file="$(find fellowme_navigation)/params/apriltag/settings.yaml"/>
     <rosparam command="load" file="$(find fellowme_navigation)/params/apriltag/tags.yaml"/>
-    <rosparam command="load" file="$(find fellowme_navigation)/params/kf/kf_tag.yaml"/>
+    
     
   </node>
 
@@ -28,8 +28,9 @@
   <node pkg="fellowme_navigation" type="fellowme_tag_transformer.py" name="fellowme_tag_transformer" output="screen" />
   
   
-  <node pkg="fellowme_navigation" type="fellowme_tag_filter.py" name="fellowme_tag_filter" output="screen" />
-
+  <node pkg="fellowme_navigation" type="fellowme_tag_filter.py" name="fellowme_tag_filter" output="screen">
+  <rosparam command="load" file="$(find fellowme_navigation)/params/kf/kf_tag.yaml"/>
+  </node>
 
 </launch>
 
