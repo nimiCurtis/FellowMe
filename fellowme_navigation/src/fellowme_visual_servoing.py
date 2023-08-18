@@ -20,13 +20,15 @@ import numpy as np
 class VisServoNode():
     def __init__(self) -> None:
         rospy.init_node('fellowme_visual_servoing')
+
+        self.fix_orientation = False
+        self.eps = rospy.get_param('/fellowme_visual_servoing/angle_eps',3) # deg
+        self.thresh = rospy.get_param('/fellowme_visual_servoing/angle_thresh',15) # deg  
+        
+        
         self.kf_tag_sub = rospy.Subscriber('kf/tag_detections/projected', PoseStamped, self.tag_cb)
         self.cmd_vel_pub = rospy.Publisher('/fellowme/mobile_base_controller/cmd_vel',Twist,queue_size=100)
         self.srv = Server(ParametersConfig, self.cfg_callback)
-        self.target_angle = 0.
-        self.eps = rospy.get_param('/fellowme_visual_servoing/angle_eps',3) # deg
-        self.thresh = rospy.get_param('/fellowme_visual_servoing/angle_thresh',15) # deg  
-        self.fix_orientation = False
         
     def cfg_callback(self, config, level):
 
