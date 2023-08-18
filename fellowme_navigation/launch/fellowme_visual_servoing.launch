@@ -1,0 +1,14 @@
+
+
+<launch>
+
+    <!-- Depth Image to Laser Scan Node -->
+    <node name="fellowme_visual_servoing" pkg="fellowme_navigation" type="fellowme_visual_servoing.py" output="screen">
+
+        <!-- PARAMETERS: -->
+        <!-- load parameters  -->
+        <rosparam command="load" file="$(find fellowme_navigation)/params/visual_servoing/visual_servoing.yaml"/>
+    </node>
+
+
+</launch>
