@@ -25,11 +25,11 @@ TebLocalPlannerROS:
   publish_feedback: True
 
   # Robot
-7
-  max_vel_x: 1.0 # Maximum translational velocity of the robot in meters/sec
-  max_vel_x_backwards: 0.2 # Maximum absolute translational velocity of the robot while driving backwards in meters/sec. See optimization parameter weight_kinematics_forward_drive
+
+  max_vel_x: 0.6 # Maximum translational velocity of the robot in meters/sec
+  max_vel_x_backwards: 0.1 # Maximum absolute translational velocity of the robot while driving backwards in meters/sec. See optimization parameter weight_kinematics_forward_drive
   max_vel_theta: 1.0 # Maximum angular velocity of the robot in radians/sec
-  acc_lim_x: 0.5 # Maximum translational acceleration of the robot in meters/sec^2
+  acc_lim_x: 0.2 # Maximum translational acceleration of the robot in meters/sec^2
   acc_lim_theta: 0.3 # Maximum angular acceleration of the robot in radians/sec^2
   min_turning_radius: 0.0 # diff-drive robot (can turn on place!)
 
