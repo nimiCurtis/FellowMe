@@ -7,11 +7,11 @@
     <group ns="$(arg robot)">
         <!-- Launch depth2scan node -->
         <include file="$(find fellowme_navigation)/launch/fellowme_depth2scan.launch" >
-                <remap from="scan" to="$(arg robot)/scan_filtered" if="$(eval is_scan_filter == 'false')"/>
+                <remap from="scan" to="$(arg robot)/scan_filtered" />
         </include>
 
         <!-- Launch scan_filter node -->
-        <include file="$(find fellowme_navigation)/launch/fellowme_scan_filter.launch" if="$(arg is_scan_filter)" />
+        <!-- <include file="$(find fellowme_navigation)/launch/fellowme_scan_filter.launch" if="$(arg is_scan_filter)" /> -->
 
     </group>
 
