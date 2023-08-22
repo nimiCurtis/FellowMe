@@ -23,7 +23,7 @@ class VisServoNode():
 
         self.fix_orientation = False
         self.eps = rospy.get_param('/fellowme_visual_servoing/angle_eps',3) # deg
-        self.thresh = rospy.get_param('/fellowme_visual_servoing/angle_thresh',15) # deg  
+        self.thresh = rospy.get_param('/fellowme_visual_servoing/angle_thresh',10) # deg  
         
         
         self.kf_tag_sub = rospy.Subscriber('kf/tag_detections/projected', PoseStamped, self.tag_cb)
