@@ -1,0 +1,9 @@
+<launch>
+    <arg name="is_scan_filter" default="false"/>
+
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter" output="log">
+        <rosparam command="load" file="$(find fellowme_navigation)/params/scan_filter/tag_scan_filter.yaml" />
+        <!-- <remap from="scan" to="base_scan" /> -->
+        <!-- <remap from="scan_filtered" to="scan" /> -->
+    </node>
+</launch>

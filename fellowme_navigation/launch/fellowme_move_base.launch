@@ -1,8 +1,24 @@
 <?xml version="1.0"?>
 <launch>
+    <!-- arguments -->
+    <arg name="is_scan_filter" default="true"/>
+    <arg name="robot" default="fellowme"/>
 
-    <!-- Launch depth2scan node -->
-    <include file="$(find fellowme_navigation)/launch/fellowme_depth2scan.launch"/>
+    <group ns="$(arg robot)">
+        <!-- Launch depth2scan node -->
+        <include file="$(find fellowme_navigation)/launch/fellowme_depth2scan.launch" >
+                <remap from="scan" to="$(arg robot)/scan_filtered" if="$(eval is_scan_filter == 'false')"/>
+        </include>
+
+        <!-- Launch scan_filter node -->
+        <include file="$(find fellowme_navigation)/launch/fellowme_scan_filter.launch" if="$(arg is_scan_filter)" />
+
+    </group>
+
+
+    
+    
+
     
     <!-- Launch move_base node  -->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
@@ -22,8 +38,9 @@
         <rosparam file="$(find fellowme_navigation)/params/move_base/planner/global_CarrotPlanner.yaml" command="load" />
 
         <!-- # planner local -->
-        <rosparam file="$(find fellowme_navigation)/params/move_base/planner/local_DWAPlanner.yaml" command="load" /> 
-        <!-- <rosparam file="$(find fellowme_navigation)/params/move_base/planner/local_TebPlanner.yaml" command="load" />  -->
+        <!-- <rosparam file="$(find fellowme_navigation)/params/move_base/planner/local_DWAPlanner.yaml" command="load" />  -->
+        <rosparam file="$(find fellowme_navigation)/params/move_base/planner/local_TebPlanner.yaml" command="load" /> 
+        <!-- <rosparam file="$(find fellowme_navigation)/params/move_base/planner/local_MpcPlanner.yaml" command="load" />  -->
 
         <!-- # move base -->
         <rosparam file="$(find fellowme_navigation)/params/move_base/move_base_params.yaml" command="load"/>

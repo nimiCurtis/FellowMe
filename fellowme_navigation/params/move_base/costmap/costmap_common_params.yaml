@@ -34,14 +34,14 @@ obstacles:
   laser_scan_sensor:
     sensor_frame: camera_depth_frame
     data_type: LaserScan
-    topic: scan 
+    topic: fellowme/scan_filtered # scan | scan_filtered
     marking: true 
     clearing: true
 
 
 # http://wiki.ros.org/costmap_2d/hydro/inflation
 inflation_layer:
-  inflation_radius: 0.17
+  inflation_radius: 0.1
   cost_scaling_factor : 1
 
 

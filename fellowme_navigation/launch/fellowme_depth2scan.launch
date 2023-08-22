@@ -4,12 +4,15 @@
 -->
 
 <launch>
-
+    <arg name="is_scan_filter" default="False"/>
+    <arg name="robot" default="fellowme"/>
     <!-- Depth Image to Laser Scan Node -->
     <node name="depthimage_to_laserscan" pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" args="">
 
         <remap from="image"  to="/camera/depth/image_rect_raw"/> <!-- change here for your camera depth topic name. Default: "/camera/depth/image_raw" -->
-        <remap from="camera_info" to="/camera/depth/camera_info"/> 
+        <remap from="camera_info" to="/camera/depth/camera_info"/>
+        <remap from="scan" to="$(arg robot)/scan_filtered" if="$(eval arg('is_scan_filter') == 'False')"/>
+
         <!-- the remap for camera_info by default uses the same path as the one given to the image topic. Default: "<path_to_image_topic>/camera_info>" -->
 
         <!-- PARAMETERS: -->
