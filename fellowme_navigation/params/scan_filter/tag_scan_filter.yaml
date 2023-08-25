@@ -2,7 +2,7 @@ scan_filter_chain:
 - name: tag_box_filter
   type: laser_filters/LaserScanBoxFilter
   params:
-    box_frame: tag_5
+    box_frame: tag_1
     min_x: -0.2
     max_x: 0.2
     min_y: -0.2
