@@ -84,8 +84,8 @@ class NavNode():
             try:
                 if self.is_subscribers_receiving():
                     goal_pose = self.get_target_pose_from_tag()
-                    if self.distance_thresh(self.robot_pose, goal_pose, 0.3 + 0.17):
-                        if self.distance_thresh(self.last_goal_pose, goal_pose, 0.1):
+                    if self.distance_thresh(self.robot_pose, goal_pose, 0.5 + 0.17):
+                        if self.distance_thresh(self.last_goal_pose, goal_pose, 0.05):
                             self.last_goal_pose = goal_pose
                             self.client.cancel_goal()
                             self.exec_flag = False
@@ -114,8 +114,8 @@ class NavNode():
         if not self.ctrl_c:
             if self.is_subscribers_receiving():
                 target_pose = self.get_target_pose_from_tag()
-                if self.distance_thresh(self.robot_pose, target_pose, 0.3 + 0.17):
-                    if self.distance_thresh(self.last_goal_pose, target_pose, 0.1): 
+                if self.distance_thresh(self.robot_pose, target_pose, 0.5 + 0.17):
+                    if self.distance_thresh(self.last_goal_pose, target_pose, 0.05): 
                         self.movebase_client(target_pose)
             else:
                 self.client.cancel_goal()
@@ -154,7 +154,7 @@ if __name__ == '__main__':
         nav = NavNode()
         
         # Control loop rate
-        rate = rospy.Rate(15)
+        rate = rospy.Rate(10)
         while not nav.ctrl_c:
             try:
                 # Navigate the robot based on received data
