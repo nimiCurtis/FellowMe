@@ -63,9 +63,9 @@ ros::Time command_t;
 // Callback function for the wheel command velocity subscriber
 void cmd_wheels_callback(const fellowme_msgs::WheelsCmdStamped& cmd_msg)
 {
-  wheel_cmd_velocity_left = cmd_msg.wheels_cmd.angular_velocities.joint[0];
-  wheel_cmd_velocity_right = cmd_msg.wheels_cmd.angular_velocities.joint[1];
-  command_t = nh.now();
+    wheel_cmd_velocity_left = cmd_msg.wheels_cmd.angular_velocities.joint[0];
+    wheel_cmd_velocity_right = cmd_msg.wheels_cmd.angular_velocities.joint[1];
+    command_t = nh.now();
 }
 
 void setup()
@@ -87,8 +87,6 @@ void setup()
   motor_left.setSpeed(0);
   motor_right.setSpeed(0);
 
-
-
   nh.getHardware()->setBaud(115200);
   nh.initNode();
   nh.advertise(pub_encoders_);
@@ -99,14 +97,14 @@ void loop()
 {
   int left_ticks = encoder_left.getTicks();
   int right_ticks = encoder_right.getTicks();
+  double left_pwm;
+  double right_pwm;
 
   ros::Time currT = nh.now();
   ros::Duration dt = currT - prevT;
   ros::Duration command_dt = currT - command_t;
-  if (command_dt.toSec() > E_STOP_COMMAND_RECEIVED_DURATION){
-    wheel_cmd_velocity_left = 0;
-    wheel_cmd_velocity_right = 0;
-  }
+  
+
   // float deltaT = ((currT - prevT)) / 1.0e6;
 
   // if (deltaT >= 0.05)
@@ -115,6 +113,7 @@ void loop()
     JointState joint_state_left = encoder_left.getJointState();
     JointState joint_state_right = encoder_right.getJointState();
 
+    //calc left velocity
     msg_measured_joint_states_.position[0] += joint_state_left.angular_position_;
 
     left_angular_velocity_filter = 0.88 * left_angular_velocity_filter + 0.06 * joint_state_left.angular_velocity_ + 0.06 * left_angular_velocity_prev;
@@ -122,23 +121,33 @@ void loop()
 
     msg_measured_joint_states_.velocity[0] = left_angular_velocity_filter;
 
+    //calc right velocity
     msg_measured_joint_states_.position[1] += joint_state_right.angular_position_;
 
     right_angular_velocity_filter = 0.88 * right_angular_velocity_filter + 0.06 * joint_state_right.angular_velocity_ + 0.06 * right_angular_velocity_prev;
     right_angular_velocity_prev = joint_state_right.angular_velocity_;
 
     msg_measured_joint_states_.velocity[1] = right_angular_velocity_filter;
-
-
-    // Control the left wheel
-    double left_pwm = motor_pid_left_.compute(wheel_cmd_velocity_left, left_angular_velocity_filter,dt.toSec());
-    motor_left.setSpeed((int)left_pwm);
     
+    // nh.loginfo(String(command_dt.toSec()).c_str());
+    if (command_dt.toSec() > E_STOP_COMMAND_RECEIVED_DURATION){
+      nh.logwarn("Communication Error! Didn't recieved command velocity! Emergency STOP");
+      left_pwm = 0;
+      right_pwm = 0;
+      delay(100);
+    }
+    else{
+      
+      left_pwm = motor_pid_left_.compute(wheel_cmd_velocity_left, left_angular_velocity_filter,dt.toSec());
+      right_pwm = motor_pid_right_.compute(wheel_cmd_velocity_right, right_angular_velocity_filter,dt.toSec());
+    }
     
     // Control the right wheel
-    double right_pwm = motor_pid_right_.compute(wheel_cmd_velocity_right, right_angular_velocity_filter,dt.toSec());
     motor_right.setSpeed((int)right_pwm);
 
+    // Control the left wheel
+    motor_left.setSpeed((int)left_pwm);
+    
     // set effort and names
     msg_measured_joint_states_.name = names;
     msg_measured_joint_states_.effort[0] = left_pwm;
