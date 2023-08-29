@@ -8,9 +8,11 @@ from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 from apriltag_ros.msg import AprilTagDetectionArray
 import tf
-from tf import TransformListener
-from tf.transformations import *
-
+# from tf import TransformListener
+# from tf.transformations import *
+import tf2_ros 
+# from tf2_ros import TransformListener
+import tf2_geometry_msgs
 class TagTransformerNode:
     def __init__(self):
         """
@@ -27,18 +29,33 @@ class TagTransformerNode:
         
         # Path and TransformListener initialization
         self.path = Path()
-        self.tl = TransformListener()
-
-    def get_tag_transformed(self, tag_pose, target_frame):
+        self.tf_buffer = tf2_ros.Buffer(rospy.Duration(100.0))  # tf buffer length
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+        
+        
+        
+    def get_tag_transformed(self, tag_pose, target_frame, time=rospy.Duration(0.0)):
         """
         Transforms tag pose to the specified target frame.
         """
-        if self.tl.canTransform(target_frame, 'camera_color_optical_frame', rospy.Time()):
-            tag_in_odom = self.tl.transformPose(target_frame=target_frame, ps=tag_pose)
-            return tag_in_odom
-        else:
-            rospy.logwarn("AR tag transform error")
-            return None
+        transform = self.tf_buffer.lookup_transform(target_frame,
+                                       # source frame:
+                                       tag_pose.header.frame_id,
+                                       # get the tf at the time the pose was valid
+                                       tag_pose.header.stamp,
+                                       # wait for at most 1 second for transform, otherwise throw
+                                       rospy.Duration(1.0))
+
+        tag_transformed = tf2_geometry_msgs.do_transform_pose(tag_pose, transform)
+        
+        # if self.tl.can_transform(target_frame, 'camera_optical_frame',time=rospy.Time.now(),timeout=rospy.Duration(0.01)):
+        #     tag_trasnformed = self.tl.transform(target_frame=target_frame, object_stamped=tag_pose)
+        #     return tag_trasnformed
+        # else:
+        #     print(target_frame)
+        #     rospy.logwarn("AR tag transform error")
+        #     return None
+        return tag_transformed
         
     def tag_received(self, detections_list):
         """
@@ -52,17 +69,20 @@ class TagTransformerNode:
         """
         tag_pose = PoseStamped()
         if self.tag_received(msg.detections):
+            
             tag_pose.header = msg.detections[-1].pose.header
+            # tag_pose.header.frame_id = msg.detections[-1].pose.header.frame_id
+            # tag_pose.header.stamp = rospy.Time.now()
             tag_pose.pose = msg.detections[-1].pose.pose.pose
 
             tag_in_base = self.get_tag_transformed(tag_pose=tag_pose, target_frame='base_link')
-            
+            tag_in_map = self.get_tag_transformed(tag_pose=tag_pose, target_frame='map')
+
             # Projected tag (set z position and orientation x, y to zero)
             tag_in_base.pose.position.z = 0
             tag_in_base.pose.orientation.x = 0
             tag_in_base.pose.orientation.y = 0
             
-            tag_in_map = self.get_tag_transformed(tag_pose=tag_pose, target_frame='map')
 
             if tag_in_map is not None:
                 self.path.header = tag_in_map.header

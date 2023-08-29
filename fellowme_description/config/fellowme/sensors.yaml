@@ -1,8 +1,15 @@
 camera:
-  parent_link: base_link
+  parent_link: h264_fisheye_link
   use_nominal_extrinsics: false
   add_plug: false
-  use_mesh: true
-  dx: 0.17
-  dy: 0
-  dz: 0.001
+  mass: 0.01
+  radius: 0.008
+  length: 0.01
+  type: h264_fisheye # choose one camera type [h264_fisheye, arducam]
+  dx: 0.003
+  dy: 0.0 
+  dz: 0.0
+  meshes: # Name of the mesh files. Leave it empty ('') to have a red cylinder
+    h264_fisheye: ""
+    scale: '0.001 0.001 0.001'
+  color: silver # check commons for names

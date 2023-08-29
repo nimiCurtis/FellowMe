@@ -1,10 +1,14 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="fellowme">
 
+
   <xacro:property name="package_name" value="fellowme_description"/>
   <xacro:property name="robot_name" value="fellowme"/>
+  <xacro:arg name="camera_type" default="'h264_fisheye'" />
 
   <xacro:include filename="$(find ${package_name})/urdf/include/common_macros.urdf.xacro" />
+  <xacro:include filename="$(find ${package_name})/urdf/include/common_sensors.xacro" />
+  <xacro:include filename="$(find ${package_name})/urdf/include/addon_macro.urdf.xacro" />
   <xacro:include filename="$(find ${package_name})/urdf/include/robot.gazebo.xacro" />
 
   <xacro:property name="wheel_yaml" value="$(find ${package_name})/config/${robot_name}/wheel.yaml" />
@@ -15,6 +19,9 @@
 
   <xacro:property name="base_yaml" value="$(find ${package_name})/config/${robot_name}/base.yaml" />
   <xacro:property name="base_props" value="${xacro.load_yaml(base_yaml)}"/>
+
+  <xacro:property name="sensor_yaml" value="$(find ${package_name})/config/${robot_name}/sensors.yaml" />
+  <xacro:property name="sensor_props" value="${xacro.load_yaml(sensor_yaml)}"/>
 
 
 
@@ -60,6 +67,27 @@
                    sensor_prop="${sensor_prop}"
                    enable_gpu="${sensor_prop['laser']['enable_gpu']}">
   </xacro:laser> -->
+
+  <!-- Camera -->
+  <!-- Camera mount link -->
+  <xacro:addon addon="camera_mount" base_prop="${base_props}" parent_link="base_link" >
+        <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:addon>
+  <!-- Choose between different cameras using the camera_type xacro argument -->
+  <!-- Must be one of ['h264_fisheye'] -->
+  <xacro:if value="${$(arg camera_type) == 'h264_fisheye'}">
+    <!-- Raspi cam mount link -->
+    <xacro:addon addon="h264_fisheye" base_prop="${base_props}" parent_link="camera_mount_link" >
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:addon>
+    <!-- Raspi cam -->
+    <xacro:camera_sensor parent_link="${sensor_props['camera']['parent_link']}" visualize="false"
+                         sensor_prop="${sensor_props}"
+                         mesh="${sensor_props['camera']['meshes']['h264_fisheye']}" >
+      <origin xyz="0.0 0 0.0" rpy="0 0 0" />
+    </xacro:camera_sensor>
+  </xacro:if>
+  
 
   <!-- Gazebo -->
   <xacro:gazebo_ros_control robotNamespace="/fellowme">

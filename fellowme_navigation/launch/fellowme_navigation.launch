@@ -2,10 +2,11 @@
 
 <launch>
     <arg name="model" default="fellowme"/>
-    <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom"/>
+    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom"/> -->
 
-    <!-- Launch apriltag -->
-    <include file="$(find fellowme_navigation)/launch/fellowme_apriltag.launch"/>
+
+    <!-- Launch tag detect and kf -->
+    <include file="$(find fellowme_navigation)/launch/fellowme_tag_kf.launch"/>
     
     <!-- Launch move_base -->
     <include file="$(find fellowme_navigation)/launch/fellowme_move_base.launch"/>

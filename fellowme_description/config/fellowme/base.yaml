@@ -4,3 +4,29 @@ base:
   length: 0.002            # Dimension in y axis
   # mesh: 'base_link.STL'  # Name of the mesh files. Leave it empty ('') to have a white base.
   mesh: ''
+
+camera_mount:
+  mass: 0.01               # Camera mount mass in kg
+  x_size: 0.015            # Dimension in x axis
+  y_size: 0.035             # Dimension in y axis
+  z_size: 0.035             # Dimension in z axis
+  dx: 0.16
+  dy: 0
+  dz: 0.0185
+  # mesh: 'camera_mount/camera_mount.stl'  # Name of the mesh files. Leave it empty ('') to have a white base.
+  mesh: ''
+  scale: '0.001 0.001 0.001'
+  color: Gazebo/Grey
+
+h264_fisheye:
+  mass: 0.005                # Raspi cam mount mass in kg
+  x_size: 0.01              # Dimension in x axis
+  y_size: 0.01             # Dimension in y axis
+  z_size: 0.01             # Dimension in z axis
+  dx: 0
+  dy: 0
+  dz: 0
+  mesh: ''  # Name of the mesh files. Leave it empty ('') to have a white base.
+  #mesh: ''
+  scale: '0.001 0.001 0.001'
+  color: Gazebo/Grey

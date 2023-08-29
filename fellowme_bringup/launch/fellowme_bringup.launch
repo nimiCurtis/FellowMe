@@ -10,13 +10,16 @@
         For the motor driver the node `motor_driver.py` from the `grove_motor_driver` package is started.
         And for the encoders rosserial communicates with the Teensy microcontroller to publish the encoder ticks. 
     -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom"/>
 
     <include file="$(find fellowme_bringup)/launch/fellowme_minimal.launch">
         <arg name="model" value="$(arg model)" />
     </include>
 
     <!-- Bringup camera -->
-    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <include file="$(find usb_cam)/launch/usb_cam.launch">
+        <rosparam command="load" file="$(find fellowme_bringup)/params/usb_cam.yml"/>
+        <param name="camera_info_url" value="file://$(find fellowme_bringup)/calib/camera/h264_fisheye.yaml"/>
     </include>
 
     <!-- Starting robot state publish which will publish tf -->

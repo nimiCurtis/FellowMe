@@ -36,7 +36,7 @@
         </geometry>
         <material name="white" />
       </visual>
-    </xacro:if>  
+    </xacro:if>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -45,14 +45,14 @@
     </collision>
     </link>
     <joint name="${addon}_joint" type="fixed">
-      <!--origin xyz="0 0 0" rpy="0 0 0" /-->
+      <origin xyz="${base_prop[addon]['dx']} ${base_prop[addon]['dy']} ${base_prop[addon]['dz']}" rpy="0 0 0"/>
       <xacro:insert_block name="origin" />
       <parent link="${parent_link}" />
       <child link="${addon}_link" />
       <axis xyz="0 0 0" />
     </joint>
-    <gazebo reference="${addon}">
-      <material>Gazebo/Black</material>
+    <gazebo reference="${addon}_link">
+      <material>${base_prop[addon]['color']}</material>
     </gazebo>
   </xacro:macro>
 </robot>

@@ -4,8 +4,8 @@
   <arg name="launch_prefix" default="" />
 
   <!-- configure camera input -->
-  <arg name="camera_name" default="/camera" />
-  <arg name="image_topic" default="color/image_raw" />
+  <arg name="camera_name" default="/usb_cam" />
+  <arg name="image_topic" default="/image_raw" />
   <arg name="queue_size" default="1" />
 
   <!-- apriltag_ros continuous detection node -->
@@ -20,16 +20,6 @@
     <!-- load parameters (incl. tag family, tags, etc.) -->
     <rosparam command="load" file="$(find fellowme_navigation)/params/apriltag/settings.yaml"/>
     <rosparam command="load" file="$(find fellowme_navigation)/params/apriltag/tags.yaml"/>
-    
-    
-  </node>
-
-  <!-- Launch tag frame transformer-->
-  <node pkg="fellowme_navigation" type="fellowme_tag_transformer.py" name="fellowme_tag_transformer" output="screen" />
-  
-  
-  <node pkg="fellowme_navigation" type="fellowme_tag_filter.py" name="fellowme_tag_filter" output="screen">
-  <rosparam command="load" file="$(find fellowme_navigation)/params/kf/kf_tag.yaml"/>
   </node>
 
 </launch>

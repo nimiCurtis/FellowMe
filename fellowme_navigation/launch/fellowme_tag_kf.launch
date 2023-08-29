@@ -1,0 +1,15 @@
+<!-- Bringup apriltag kf-->
+<launch>
+    <!-- set to value="gdbserver localhost:10000" for remote debugging -->
+    <arg name="launch_prefix" default="" />
+
+    <include file="$(find fellowme_navigation)/launch/fellowme_apriltag.launch">
+    </include>
+
+    <!-- Launch tag frame transformer-->
+    <node pkg="fellowme_navigation" type="fellowme_tag_transformer.py" name="fellowme_tag_transformer" output="screen" />
+
+    <node pkg="fellowme_navigation" type="fellowme_tag_filter.py" name="fellowme_tag_filter" output="screen">
+    <rosparam command="load" file="$(find fellowme_navigation)/params/kf/kf_tag.yaml"/>
+    </node>
+</launch>
