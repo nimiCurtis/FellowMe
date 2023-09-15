@@ -17,10 +17,15 @@
     </include>
 
     <!-- Bringup camera -->
-    <include file="$(find usb_cam)/launch/usb_cam.launch">
-        <rosparam command="load" file="$(find fellowme_bringup)/params/usb_cam.yml"/>
-        <param name="camera_info_url" value="file://$(find fellowme_bringup)/calib/camera/h264_fisheye.yaml"/>
-    </include>
+    <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+        <!-- <rosparam command="load" file="$(find fellowme_bringup)/params/usb_cam.yml" />
+        <param name="camera_info_url" value="file://$(find fellowme_bringup)/calib/camera/h264_fisheye.yaml" />
+     -->
+        <rosparam command="load" file="$(find fellowme_bringup)/params/usb_cam_ardu.yml" />
+        <param name="camera_info_url" value="file://$(find fellowme_bringup)/calib/camera/arducam.yaml" />
+    
+    
+    </node>
 
     <!-- Starting robot state publish which will publish tf -->
     <!-- This is needed to publish transforms between all links -->

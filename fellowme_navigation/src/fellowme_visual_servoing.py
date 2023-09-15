@@ -32,7 +32,7 @@ class VisServoNode():
         
     def cfg_callback(self, config, level):
 
-            rospy.loginfo("""Reconfigure Request: {k}""".format(**config))
+            rospy.loginfo("""Reconfigure Request: servi coeff = {k}""".format(**config))
             self.k = config.k
 
             return config
